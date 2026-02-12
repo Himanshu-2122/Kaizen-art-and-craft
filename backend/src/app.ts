@@ -17,17 +17,10 @@ app.use(express.json());
 
 
 /* ---------- CORS ---------- */
-const allowedOrigins = [
-  "http://localhost:8080", // vite dev
-  "http://localhost:5173", // alternate vite
-];
+app.use(cors({
+  origin: "*"
+}));
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-); 
 
 /* ---------- Routes ---------- */
 app.use("/api/products", productRoutes);
