@@ -1,0 +1,25 @@
+export const SITE_NAME = "Kaizen Art and Craft";
+export const SITE_TAGLINE = "Modern Furniture, Timeless Design";
+
+export const PLACEHOLDER_COLLECTIONS = [
+  { name: "Living Room", slug: "living-room", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80", description: "Stylish sofas, coffee tables, and living essentials" },
+  { name: "Bedroom", slug: "bedroom", image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&q=80", description: "Beds, nightstands, and cozy bedroom pieces" },
+  { name: "Office", slug: "office", image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&q=80", description: "Desks, chairs, and productivity-boosting furniture" },
+  { name: "Dining", slug: "dining", image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&q=80", description: "Dining tables, chairs, and kitchen furniture" },
+  { name: "Outdoor", slug: "outdoor", image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb3?w=800&q=80", description: "Patio sets, garden furniture, and outdoor living" },
+];
+
+export const PLACEHOLDER_PRODUCTS = [
+  { name: "Nordic Lounge Chair", slug: "nordic-lounge-chair", price: 599, collection: "living-room", image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600&q=80", description: "Minimalist lounge chair with oak frame and premium fabric upholstery.", sizes: ["Standard"], stock: 12, featured: true, best_seller: true },
+  { name: "Elm Wood Coffee Table", slug: "elm-wood-coffee-table", price: 349, collection: "living-room", image: "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=600&q=80", description: "Handcrafted elm wood coffee table with clean geometric lines.", sizes: ["Small", "Large"], stock: 8, featured: true, best_seller: false },
+  { name: "Cloud Sectional Sofa", slug: "cloud-sectional-sofa", price: 1899, collection: "living-room", image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80", description: "Ultra-comfortable modular sectional in soft bouclé fabric.", sizes: ["3-Seater", "4-Seater"], stock: 5, featured: true, best_seller: true },
+  { name: "Zen Platform Bed", slug: "zen-platform-bed", price: 1249, collection: "bedroom", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&q=80", description: "Low-profile platform bed in walnut with integrated nightstands.", sizes: ["Queen", "King"], stock: 7, featured: true, best_seller: false },
+  { name: "Birch Nightstand", slug: "birch-nightstand", price: 199, collection: "bedroom", image: "https://images.unsplash.com/photo-1532372576444-dda954194ad0?w=600&q=80", description: "Simple birch nightstand with soft-close drawer.", sizes: ["Standard"], stock: 20, featured: false, best_seller: true },
+  { name: "Arc Standing Desk", slug: "arc-standing-desk", price: 749, collection: "office", image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600&q=80", description: "Electric sit-stand desk with bamboo top and cable management.", sizes: ["48\"", "60\""], stock: 15, featured: true, best_seller: true },
+  { name: "Ergo Task Chair", slug: "ergo-task-chair", price: 449, collection: "office", image: "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&q=80", description: "Ergonomic mesh task chair with lumbar support and adjustable arms.", sizes: ["Standard"], stock: 18, featured: false, best_seller: true },
+  { name: "Oak Dining Table", slug: "oak-dining-table", price: 999, collection: "dining", image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=600&q=80", description: "Solid oak dining table with tapered legs, seats 6-8.", sizes: ["6-Seat", "8-Seat"], stock: 4, featured: true, best_seller: false },
+  { name: "Woven Dining Chair", slug: "woven-dining-chair", price: 179, collection: "dining", image: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=600&q=80", description: "Paper cord woven seat with solid ash frame.", sizes: ["Standard"], stock: 30, featured: false, best_seller: true },
+  { name: "Teak Garden Set", slug: "teak-garden-set", price: 1599, collection: "outdoor", image: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb3?w=600&q=80", description: "Weather-resistant teak table and 4 chairs set.", sizes: ["4-Seat", "6-Seat"], stock: 3, featured: true, best_seller: false },
+  { name: "Rattan Lounge Chair", slug: "rattan-lounge-chair", price: 399, collection: "outdoor", image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=600&q=80", description: "Synthetic rattan outdoor lounge with cushion.", sizes: ["Standard"], stock: 10, featured: false, best_seller: false },
+  { name: "Floating Wall Shelf", slug: "floating-wall-shelf", price: 89, collection: "living-room", image: "https://images.unsplash.com/photo-1588200908342-23b585c03e26?w=600&q=80", description: "Minimalist floating shelf in matte white or natural oak.", sizes: ["24\"", "36\"", "48\""], stock: 50, featured: false, best_seller: true },
+];
