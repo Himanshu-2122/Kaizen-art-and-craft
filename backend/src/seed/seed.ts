@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 
 import { Collection } from "../models/category.model";
 import { Product } from "../models/product.model";
-import { User } from "../models/User";
+import { User } from "../models/user.model";
 
 /* =========================================
    DATA
