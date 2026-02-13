@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Heart, User, ShoppingCart, Menu, X } from "lucide-react";
-import { SITE_NAME } from "@/lib/constants";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
@@ -19,23 +18,27 @@ export default function MainNavbar() {
   const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
-
   const { itemCount } = useCart();
   const { user, isAdmin } = useAuth();
 
+  /* =============================
+     SEARCH HANDLER (shared logic)
+  ============================= */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!search.trim()) return;
 
     navigate(`/shop?search=${encodeURIComponent(search)}`);
-    setSearch(""); // optional clear input
+
+    setSearch("");
+    setOpen(false); // mobile drawer close
   };
 
   return (
     <header className="w-full bg-white border-b sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between gap-6 h-20 px-4">
-        {/* Logo */}
+        {/* ================= LOGO ================= */}
         <div className="flex-1">
           <Link to="/" className="flex items-center">
             <img
@@ -46,7 +49,7 @@ export default function MainNavbar() {
           </Link>
         </div>
 
-        {/* Center Links */}
+        {/* ================= DESKTOP LINKS ================= */}
         <nav className="hidden lg:flex flex-1 justify-center gap-8 text-sm font-medium">
           {NAV_LINKS.map((l) => (
             <Link
@@ -57,6 +60,7 @@ export default function MainNavbar() {
               {l.label}
             </Link>
           ))}
+
           {isAdmin && (
             <Link to="/admin" className="text-[#E67235] font-semibold">
               Admin
@@ -64,7 +68,7 @@ export default function MainNavbar() {
           )}
         </nav>
 
-        {/* 🔥 Search (UPDATED) */}
+        {/* ================= DESKTOP SEARCH ================= */}
         <div className="hidden md:block flex-1 max-w-xl relative">
           <form onSubmit={handleSearch}>
             <Search
@@ -83,12 +87,9 @@ export default function MainNavbar() {
           </form>
         </div>
 
-        {/* Icons */}
+        {/* ================= ICONS ================= */}
         <div className="flex items-center gap-6 text-gray-700">
-          <Link
-            to={user ? "/profile" : "/auth"}
-            className="hover:text-[#E67235]"
-          >
+          <Link to={user ? "/profile" : "/auth"} className="hover:text-[#E67235]">
             <User size={20} />
           </Link>
 
@@ -105,6 +106,7 @@ export default function MainNavbar() {
             )}
           </Link>
 
+          {/* Mobile menu button */}
           <Button
             variant="ghost"
             size="icon"
@@ -116,7 +118,7 @@ export default function MainNavbar() {
         </div>
       </div>
 
-      {/* Mobile Nav */}
+      {/* ================= MOBILE DRAWER ================= */}
       {open && (
         <div className="lg:hidden fixed inset-0 z-50">
           {/* overlay */}
@@ -137,17 +139,22 @@ export default function MainNavbar() {
               />
             </div>
 
-            {/* search inside mobile */}
-            <div className="relative mb-6">
+            {/* mobile search */}
+            <form onSubmit={handleSearch} className="relative mb-6">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                onClick={handleSearch}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
               />
+
               <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products..."
-                className="w-full bg-gray-100 rounded-lg pl-9 pr-3 py-2 outline-none focus:bg-gray-200"
+                className="w-full bg-gray-100 rounded-lg pl-9 pr-3 py-2 outline-none focus:bg-gray-200 transition"
               />
-            </div>
+            </form>
 
             {/* links */}
             <nav className="flex flex-col gap-2 text-sm">
