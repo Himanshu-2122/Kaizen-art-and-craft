@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, Heart, User, ShoppingCart, Menu, X } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 import { useCart } from "@/contexts/CartContext";
@@ -16,8 +16,21 @@ const NAV_LINKS = [
 
 export default function MainNavbar() {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const navigate = useNavigate();
+
   const { itemCount } = useCart();
   const { user, isAdmin } = useAuth();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!search.trim()) return;
+
+    navigate(`/shop?search=${encodeURIComponent(search)}`);
+    setSearch(""); // optional clear input
+  };
 
   return (
     <header className="w-full bg-white border-b sticky top-0 z-50">
@@ -33,7 +46,7 @@ export default function MainNavbar() {
           </Link>
         </div>
 
-        {/* Center Links (Desktop) */}
+        {/* Center Links */}
         <nav className="hidden lg:flex flex-1 justify-center gap-8 text-sm font-medium">
           {NAV_LINKS.map((l) => (
             <Link
@@ -51,17 +64,23 @@ export default function MainNavbar() {
           )}
         </nav>
 
-        {/* Search */}
+        {/* 🔥 Search (UPDATED) */}
         <div className="hidden md:block flex-1 max-w-xl relative">
-          <Search
-            size={18}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Search furniture, decor, sofa..."
-            className="w-full bg-gray-100 rounded-full pl-10 pr-4 py-2.5 outline-none focus:bg-gray-200 transition"
-          />
+          <form onSubmit={handleSearch}>
+            <Search
+              size={18}
+              onClick={handleSearch}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer"
+            />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search furniture, decor, sofa..."
+              className="w-full bg-gray-100 rounded-full pl-10 pr-4 py-2.5 outline-none focus:bg-gray-200 transition"
+            />
+          </form>
         </div>
 
         {/* Icons */}
@@ -86,7 +105,6 @@ export default function MainNavbar() {
             )}
           </Link>
 
-          {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="icon"
@@ -100,28 +118,61 @@ export default function MainNavbar() {
 
       {/* Mobile Nav */}
       {open && (
-        <div className="lg:hidden border-t bg-white">
-          <nav className="flex flex-col p-4 gap-4 text-sm">
-            {NAV_LINKS.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* overlay */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* drawer */}
+          <div className="absolute right-0 top-0 h-full w-72 bg-white shadow-2xl p-6 flex flex-col animate-slideIn">
+            {/* header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold">Menu</h2>
+              <X
+                size={22}
+                className="cursor-pointer text-gray-600"
                 onClick={() => setOpen(false)}
-                className="text-gray-700 hover:text-[#E67235]"
-              >
-                {l.label}
-              </Link>
-            ))}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                onClick={() => setOpen(false)}
-                className="text-[#E67235] font-semibold"
-              >
-                Admin
-              </Link>
-            )}
-          </nav>
+              />
+            </div>
+
+            {/* search inside mobile */}
+            <div className="relative mb-6">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                placeholder="Search products..."
+                className="w-full bg-gray-100 rounded-lg pl-9 pr-3 py-2 outline-none focus:bg-gray-200"
+              />
+            </div>
+
+            {/* links */}
+            <nav className="flex flex-col gap-2 text-sm">
+              {NAV_LINKS.map((l) => (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  onClick={() => setOpen(false)}
+                  className="px-4 py-3 rounded-lg hover:bg-gray-100 transition font-medium"
+                >
+                  {l.label}
+                </Link>
+              ))}
+
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setOpen(false)}
+                  className="px-4 py-3 rounded-lg bg-[#E67235]/10 text-[#E67235] font-semibold"
+                >
+                  Admin
+                </Link>
+              )}
+            </nav>
+          </div>
         </div>
       )}
     </header>
