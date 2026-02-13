@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { X, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -11,19 +9,23 @@ export default function AuthPage() {
   const navigate = useNavigate();
 
   const [isLogin, setIsLogin] = useState(true);
+  const [showPass, setShowPass] = useState(false);
 
-  const [fullName, setFullName] = useState("");
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobilenumber, setMobileNumber] = useState("");
-  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({
+    fullName: "",
+    username: "",
+    email: "",
+    mobilenumber: "",
+    password: "",
+  });
 
   const [submitting, setSubmitting] = useState(false);
 
   if (loading) return null;
-
-  // ✅ already logged in → go home
   if (user) return <Navigate to="/" replace />;
+
+  const handleChange = (e: any) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,104 +33,148 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        await signIn(email, password);
-        toast.success("Welcome back!");
+        await signIn(form.email, form.password);
+        toast.success("Login successful 🎉");
       } else {
         await signUp({
-          fullName,
-          username,
-          email,
-          password,
+          fullName: form.fullName,
+          username: form.username,
+          email: form.email,
+          password: form.password,
         });
-        toast.success("Account created successfully!");
+        toast.success("Account created 🎉");
       }
 
-      // ✅ redirect to home
       navigate("/");
-
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+      toast.error(err?.message || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="container py-20 max-w-md mx-auto">
-      <h1 className="text-3xl font-bold mb-8 text-center">
-        {isLogin ? "Sign In" : "Create Account"}
-      </h1>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
-          <>
-            <div>
-              <Label>Full Name</Label>
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-              />
-            </div>
+      {/* Modal */}
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 relative animate-in fade-in zoom-in-95 duration-200">
 
-            <div>
-              <Label>Username</Label>
-              <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-          </>
-        )}
-
-        <div>
-          <Label>Email</Label>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label>Mobile Number</Label>
-          <Input
-            type="tel"
-            value={mobilenumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <Label>Password</Label>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <Button disabled={submitting} className="w-full">
-          {submitting
-            ? "Please wait..."
-            : isLogin
-            ? "Sign In"
-            : "Create Account"}
-        </Button>
-      </form>
-
-      <p className="text-center mt-6 text-sm">
-        {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+        {/* Close */}
         <button
-          onClick={() => setIsLogin(!isLogin)}
-          className="text-accent font-medium"
+          onClick={() => navigate(-1)}
+          className="absolute right-4 top-4 text-gray-400 hover:text-black"
         >
-          {isLogin ? "Sign Up" : "Sign In"}
+          <X size={20} />
         </button>
-      </p>
+
+        {/* Heading */}
+        <h2 className="text-2xl font-semibold text-center mb-8">
+          {isLogin ? "Login" : "Create Account"}
+        </h2>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+
+          {!isLogin && (
+            <>
+              <Input
+                name="fullName"
+                placeholder="Full Name"
+                value={form.fullName}
+                onChange={handleChange}
+              />
+
+              <Input
+                name="username"
+                placeholder="Username"
+                value={form.username}
+                onChange={handleChange}
+              />
+
+              <Input
+                name="mobilenumber"
+                placeholder="Mobile Number"
+                value={form.mobilenumber}
+                onChange={handleChange}
+              />
+            </>
+          )}
+
+          <Input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          {/* Password */}
+          <div className="relative">
+            <Input
+              name="password"
+              type={showPass ? "text" : "password"}
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="absolute right-4 top-3 text-gray-500"
+            >
+              {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+
+          {isLogin && (
+            <p className="text-sm text-gray-500 cursor-pointer hover:underline">
+              Forgot password?
+            </p>
+          )}
+
+          {/* Primary button */}
+          <button
+            disabled={submitting}
+            className="w-full bg-black text-white rounded-full py-3 font-medium hover:bg-gray-900 transition"
+          >
+            {submitting
+              ? "Please wait..."
+              : isLogin
+              ? "LOGIN"
+              : "CREATE ACCOUNT"}
+          </button>
+
+          {/* Switch */}
+          <button
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="w-full border rounded-full py-3 hover:bg-gray-50 transition"
+          >
+            {isLogin ? "CREATE ACCOUNT" : "BACK TO LOGIN"}
+          </button>
+        </form>
+      </div>
     </div>
+  );
+}
+
+/* ---------- reusable input ---------- */
+function Input(props: any) {
+  return (
+    <input
+      {...props}
+      required
+      className="
+        w-full
+        border
+        rounded-full
+        px-5 py-3
+        focus:outline-none
+        focus:ring-2
+        focus:ring-black
+        text-sm
+      "
+    />
   );
 }

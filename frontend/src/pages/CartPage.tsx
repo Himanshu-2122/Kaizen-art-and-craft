@@ -30,7 +30,7 @@ export default function CartPage() {
               <div className="flex-1">
                 <h3 className="font-medium">{item.name}</h3>
                 {item.size && <p className="text-xs text-muted-foreground">Size: {item.size}</p>}
-                <p className="text-sm font-semibold mt-1">${item.price.toLocaleString()}</p>
+                <p className="text-sm font-semibold mt-1">₹{item.price.toLocaleString()}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
                     <Minus className="h-3 w-3" />
@@ -51,12 +51,12 @@ export default function CartPage() {
         <div className="bg-card border rounded-md p-6 h-fit">
           <h2 className="font-display font-bold text-xl mb-4">Order Summary</h2>
           <div className="space-y-2 text-sm mb-4">
-            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>${total.toLocaleString()}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{total >= 500 ? "Free" : "$49"}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>₹{total.toLocaleString()}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Shipping</span><span>{total >= 500 ? "Free" : "₹49"}</span></div>
           </div>
           <div className="border-t pt-3 flex justify-between font-semibold text-lg mb-6">
             <span>Total</span>
-            <span>${(total + (total >= 500 ? 0 : 49)).toLocaleString()}</span>
+            <span>₹{(total + (total >= 500 ? 0 : 49)).toLocaleString()}</span>
           </div>
           <Button className="w-full bg-accent text-accent-foreground hover:bg-accent/90" asChild>
             <Link to="/checkout">Proceed to Checkout</Link>

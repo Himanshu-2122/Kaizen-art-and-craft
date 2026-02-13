@@ -1,138 +1,246 @@
 import { Request, Response } from "express";
-import { Product } from "../models/product.model";
+import mongoose from "mongoose";
 import slugify from "slugify";
+import { Product } from "../models/product.model";
 
-/*
-|--------------------------------------------------------------------------
-| CREATE PRODUCT (Admin)
-|--------------------------------------------------------------------------
-*/
+/* ======================================================
+   Helpers
+====================================================== */
+
+const getParam = (value: string | string[]) =>
+  Array.isArray(value) ? value[0] : value;
+
+
+/* ======================================================
+   CREATE PRODUCT (Admin)
+====================================================== */
 export const createProduct = async (req: Request, res: Response) => {
   try {
     const {
       name,
       description,
       price,
-      stock,
-      sizes,
-      images,
+      discountPrice,
+      stock = 0,
+      sizes = [],
+      images = [],
+      category,
       collectionId,
-      featured,
-      bestSeller
+      featured = false,
+      bestSeller = false
     } = req.body;
 
-    const slug = slugify(name, { lower: true });
-
-    const exists = await Product.findOne({ slug });
-    if (exists) {
-      return res.status(400).json({ message: "Product already exists" });
+    /* ---------- validation ---------- */
+    if (!name || !price || !category) {
+      return res.status(400).json({
+        message: "Name, price and category are required"
+      });
     }
+
+    /* ---------- slug ---------- */
+    const slug = slugify(`${name}-${Date.now()}`, {
+      lower: true,
+      strict: true
+    });
 
     const product = await Product.create({
       name,
       slug,
       description,
       price,
+      discountPrice,
       stock,
       sizes,
       images,
+      category: category.toLowerCase(),
       collectionId,
       featured,
-      bestSeller
+      bestSeller,
+      isActive: true
     });
 
     res.status(201).json(product);
+
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 
-/*
-|--------------------------------------------------------------------------
-| UPDATE PRODUCT (Admin)
-|--------------------------------------------------------------------------
-*/
+
+/* ======================================================
+   UPDATE PRODUCT
+====================================================== */
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
 
-    const product = await Product.findById(id);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid product id" });
     }
 
     if (req.body.name) {
-      product.slug = slugify(req.body.name, { lower: true });
+      req.body.slug = slugify(req.body.name, {
+        lower: true,
+        strict: true
+      });
     }
 
-    Object.assign(product, req.body);
+    if (req.body.category) {
+      req.body.category = req.body.category.toLowerCase();
+    }
 
-    await product.save();
+    const product = await Product.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true }
+    );
+
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
 
     res.json(product);
+
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 
-/*
-|--------------------------------------------------------------------------
-| DELETE PRODUCT (Admin)
-|--------------------------------------------------------------------------
-*/
+
+/* ======================================================
+   DELETE PRODUCT (Soft Delete)
+====================================================== */
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = getParam(req.params.id);
 
-    const product = await Product.findByIdAndDelete(id);
+    await Product.findByIdAndUpdate(id, { isActive: false });
 
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    res.json({ message: "Product removed successfully" });
+
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* ======================================================
+   GET PRODUCTS (Filters + Pagination)
+====================================================== */
+export const getProducts = async (req: Request, res: Response) => {
+  try {
+    const {
+      category,
+      collectionId,
+      featured,
+      bestSeller,
+      search,
+      page = 1,
+      limit = 50
+    } = req.query;
+
+    const filter: any = { isActive: true };
+
+    /* ---------- filters ---------- */
+
+    if (category) {
+      filter.category = String(category).toLowerCase();
     }
 
-    res.json({ message: "Product deleted successfully" });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    if (collectionId) {
+      filter.collectionId = collectionId;
+    }
 
+    if (featured !== undefined) {
+      filter.featured = featured === "true";
+    }
 
-/*
-|--------------------------------------------------------------------------
-| GET ALL PRODUCTS (Public)
-|--------------------------------------------------------------------------
-*/
-export const getProducts = async (_req: Request, res: Response) => {
-  try {
-    const products = await Product.find()
+    if (bestSeller !== undefined) {
+      filter.bestSeller = bestSeller === "true";
+    }
+
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
+
+    /* ---------- pagination ---------- */
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const products = await Product.find(filter)
       .populate("collectionId", "name slug")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean();   // ⭐ faster
 
-    res.json(products);
+    const total = await Product.countDocuments(filter);
+
+    res.json({
+      products,  // always array
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit))
+    });
+
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
 
 
-/*
-|--------------------------------------------------------------------------
-| GET SINGLE PRODUCT (Public)
-|--------------------------------------------------------------------------
-*/
+
+/* ======================================================
+   GET PRODUCT BY ID
+====================================================== */
 export const getProductById = async (req: Request, res: Response) => {
   try {
-    const product = await Product.findById(req.params.id)
-      .populate("collectionId", "name slug")
-      .populate("reviews.userId", "fullName avatarUrl");
+    const id = getParam(req.params.id);
 
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid product id" });
     }
 
+    const product = await Product.findOne({
+      _id: id,
+      isActive: true
+    })
+      .populate("collectionId", "name slug")
+      .lean();
+
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
+
     res.json(product);
+
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+/* ======================================================
+   GET PRODUCT BY SLUG (SEO Friendly)
+====================================================== */
+export const getProductBySlug = async (req: Request, res: Response) => {
+  try {
+    const slug = getParam(req.params.slug);
+
+    const product = await Product.findOne({
+      slug,
+      isActive: true
+    })
+      .populate("collectionId", "name slug")
+      .lean();
+
+    if (!product)
+      return res.status(404).json({ message: "Product not found" });
+
+    res.json(product);
+
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

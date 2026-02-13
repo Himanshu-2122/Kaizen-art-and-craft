@@ -1,24 +1,23 @@
 import express from "express";
 import {
+  getProducts,
+  getProductById,
+  getProductBySlug,
   createProduct,
   updateProduct,
-  deleteProduct,
-  getProducts,
-  getProductById
+  deleteProduct
 } from "../controllers/product.controller";
-
-import { protect } from "../middleware/auth.middleware";
-import { isAdmin } from "../middleware/admin.middleware";
 
 const router = express.Router();
 
-/* Public */
+/* ⭐ IMPORTANT ORDER */
+
+router.get("/slug/:slug", getProductBySlug);  // first
 router.get("/", getProducts);
 router.get("/:id", getProductById);
 
-/* Admin */
-router.post("/", protect, isAdmin, createProduct);
-router.put("/:id", protect, isAdmin, updateProduct);
-router.delete("/:id", protect, isAdmin, deleteProduct);
+router.post("/", createProduct);
+router.put("/:id", updateProduct);
+router.delete("/:id", deleteProduct);
 
 export default router;

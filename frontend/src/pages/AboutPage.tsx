@@ -65,7 +65,7 @@ export default function AboutPage() {
       {/* Contact Info */}
       <section className="container py-16 text-center">
         <h2 className="text-3xl font-display font-bold mb-4">Get In Touch</h2>
-        <p className="text-muted-foreground">Email: support@Kaizen Art and Craft.com · Phone: +1 (555) 123-4567</p>
+        <p className="text-muted-foreground">Email: hi.himanshu21@gmail.com · Phone: +1 (555) 123-4567</p>
         <p className="text-muted-foreground">123 Design Street, Stockholm, Sweden</p>
       </section>
     </div>

@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes";
 import orderRoutes from "./routes/order.routes";
 import { protect } from "./middleware/auth.middleware";
 import { checkout } from "./controllers/order.controller";
+import contactRoutes from "./routes/contact.routes";
 
 dotenv.config();
 
@@ -23,7 +24,7 @@ app.use(cors({
 
 
 /* ---------- Routes ---------- */
-app.use("/api/products", productRoutes);
+app.use("/api/v1/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 
 /* ---------- auth ---------- */
@@ -32,8 +33,10 @@ app.use("/api/v1/user", authRoutes);
 /*-----------------orders-----------------*/
  app.use("/api/v1/orders", orderRoutes);
 
-/* ---------- admin ---------- */    
-app.post("/api/v1/admin", protect, productRoutes);
+/* ---------- contact ---------- */ 
+app.use("/api/v1", contactRoutes);
+
+
  
 
 

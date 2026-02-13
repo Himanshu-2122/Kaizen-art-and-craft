@@ -28,7 +28,7 @@ export default function Footer() {
           <ul className="space-y-2 text-sm text-primary-foreground/70">
             <li>Free Shipping on orders over $500</li>
             <li>30-day return policy</li>
-            <li>support@Kaizen Art and Craft.com</li>
+            <li>hi.himanshu21@gmail.com</li>
           </ul>
         </div>
       </div>

@@ -21,12 +21,12 @@ export default function ProfilePage() {
 
     const fetchData = async () => {
       try {
-        const profileRes = await api.get("/api/v1/user/profile");
+        const profileRes = await api.get("/user/profile");
         setProfile(profileRes.data);
 
-        const orderRes = await api.get("/api/v1/orders/my");
+        const orderRes = await api.get("/orders/my");
         setOrders(orderRes.data);
-      } catch {
+      } catch (error: any) {
         toast.error("Failed to load account data");
       }
     };
@@ -40,7 +40,7 @@ export default function ProfilePage() {
   const updateProfile = async () => {
     try {
       setSaving(true);
-      await api.put("/api/v1/user/profile", {
+      await api.put("/user/profile", {
         fullName: profile.fullName,
         phone: profile.phone,
       });

@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const loadUser = async () => {
       try {
-        const { data } = await api.get("/api/v1/user/profile");
+        const { data } = await api.get("/user/profile");
         setUser(data);
       } catch {
         localStorage.removeItem("token");
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   /* ---------- LOGIN ---------- */
   const signIn = async (email: string, password: string) => {
-    const { data } = await api.post("/api/v1/user/login", {
+    const { data } = await api.post("/user/login", {
       email,
       password,
     });
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     email: string;
     password: string;
   }) => {
-    const { data } = await api.post("/api/v1/user/signup", payload);
+    const { data } = await api.post("/user/signup", payload);
 
     localStorage.setItem("token", data.accessToken);
     setUser(data.user);
