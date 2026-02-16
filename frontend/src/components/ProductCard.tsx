@@ -1,25 +1,41 @@
 import { Link } from "react-router-dom";
 
 export default function ProductCard({ product }: any) {
+
+  const image =
+    product.images?.length > 0
+      ? product.images[0]
+      : "https://via.placeholder.com/400x400?text=No+Image";
+
   return (
     <Link to={`/product/${product.slug}`}>
-      <div className="border rounded-lg p-4 hover:shadow-md transition bg-white">
 
-        <img
-          src={product.image || "/placeholder.png"}
-          alt={product.name}
-          className="w-full h-48 object-cover rounded"
-        />
+      <div className="bg-white rounded-xl border overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer">
 
-        <h3 className="mt-3 font-semibold text-sm">
-          {product.name}
-        </h3>
+        {/* ================= IMAGE ================= */}
+        <div className="aspect-square bg-gray-100">
+          <img
+            src={image}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
 
-        <p className="text-accent font-bold mt-1">
-          ₹{product.price}
-        </p>
+        {/* ================= DETAILS ================= */}
+        <div className="p-3 space-y-1">
+
+          <h3 className="font-medium line-clamp-2">
+            {product.name}
+          </h3>
+
+          <p className="text-accent font-semibold">
+            ₹{product.price}
+          </p>
+
+        </div>
 
       </div>
+
     </Link>
   );
 }

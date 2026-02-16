@@ -1,42 +1,100 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link, Navigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import  api  from "@/lib/api";
+import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import ProductCard from "@/components/ProductCard";
+
+import {
+  User,
+  Package,
+  LogOut,
+  Mail,
+  Phone,
+  Calendar,
+  CreditCard,
+  Edit2,
+  Save,
+  X,
+  ShoppingBag,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  ChevronRight,
+  Heart,
+  Settings,
+  Bell,
+  Shield,
+} from "lucide-react";
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "orders">("profile");
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "orders" | "wishlist" | "settings"
+  >("profile");
+
   const [profile, setProfile] = useState<any>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
 
+  // ✅ WISHLIST STATES
+  const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+  const [loadingWishlist, setLoadingWishlist] = useState(false);
+
+  // ================= LOAD PROFILE + ORDERS =================
   useEffect(() => {
     if (!user) return;
 
     const fetchData = async () => {
+      setDataLoading(true);
       try {
         const profileRes = await api.get("/user/profile");
         setProfile(profileRes.data);
 
         const orderRes = await api.get("/orders/my");
-        setOrders(orderRes.data);
-      } catch (error: any) {
+        setOrders(orderRes.data || []);
+      } catch {
         toast.error("Failed to load account data");
+      } finally {
+        setDataLoading(false);
       }
     };
 
     fetchData();
   }, [user]);
 
+  // ================= LOAD WISHLIST =================
+  const loadWishlist = async () => {
+    try {
+      setLoadingWishlist(true);
+      const res = await api.get("/wishlist");
+      setWishlistItems(res.data);
+    } catch {
+      toast.error("Failed to load wishlist");
+    } finally {
+      setLoadingWishlist(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "wishlist") {
+      loadWishlist();
+    }
+  }, [activeTab]);
+
   if (loading) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
+  // ================= UPDATE PROFILE =================
   const updateProfile = async () => {
     try {
       setSaving(true);
@@ -45,6 +103,7 @@ export default function ProfilePage() {
         phone: profile.phone,
       });
       toast.success("Profile updated");
+      setIsEditing(false);
     } catch {
       toast.error("Update failed");
     } finally {
@@ -52,182 +111,130 @@ export default function ProfilePage() {
     }
   };
 
-  const statusColor = (status: string) => {
-    switch (status) {
+  // ================= STATUS CONFIG =================
+  const getStatusConfig = (status: string) => {
+    switch (status?.toLowerCase()) {
       case "pending":
-        return "bg-yellow-100 text-yellow-700";
+        return { color: "bg-yellow-100 text-yellow-700", icon: Clock };
       case "completed":
-        return "bg-green-100 text-green-700";
+        return { color: "bg-green-100 text-green-700", icon: CheckCircle };
       case "cancelled":
-        return "bg-red-100 text-red-700";
+        return { color: "bg-red-100 text-red-700", icon: XCircle };
       default:
-        return "bg-gray-100 text-gray-700";
+        return { color: "bg-gray-100 text-gray-700", icon: AlertCircle };
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-white to-gray-200 py-16 px-4">
+  const stats = {
+    totalOrders: orders.length,
+    totalSpent: orders.reduce((s, o) => s + (o.total || 0), 0),
+  };
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+  const tabs = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "orders", label: "Orders", icon: Package },
+    { id: "wishlist", label: "Wishlist", icon: Heart },
+    { id: "settings", label: "Settings", icon: Settings },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
 
         {/* ================= SIDEBAR ================= */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="
-            backdrop-blur-xl
-            bg-white/70
-            border border-white/40
-            shadow-xl
-            rounded-3xl
-            p-6
-            space-y-4
-          "
-        >
-          <h2 className="text-xl font-semibold mb-4">My Account</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-          {["profile", "orders"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`w-full text-left px-4 py-3 rounded-xl transition ${
-                activeTab === tab
-                  ? "bg-black text-white shadow-md"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              {tab === "profile" ? "👤 Profile" : "📦 Orders"}
-            </button>
-          ))}
+          <div className="bg-white p-6 rounded-2xl shadow">
+            <h3 className="font-bold mb-4">{profile?.fullName}</h3>
 
-          <button
-            onClick={logout}
-            className="w-full text-left px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition"
-          >
-            🚪 Logout
-          </button>
-        </motion.div>
-
-        {/* ================= CONTENT ================= */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="
-            md:col-span-3
-            backdrop-blur-xl
-            bg-white/80
-            border border-white/40
-            shadow-2xl
-            rounded-3xl
-            p-10
-          "
-        >
-
-          {/* ================= PROFILE TAB ================= */}
-          {activeTab === "profile" && profile && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-6 max-w-md"
-            >
-              <h2 className="text-3xl font-semibold mb-4">Profile Details</h2>
-
-              <div>
-                <Label>Email</Label>
-                <Input value={profile.email} disabled />
-              </div>
-
-              <div>
-                <Label>Full Name</Label>
-                <Input
-                  value={profile.fullName || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, fullName: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label>Phone</Label>
-                <Input
-                  value={profile.phone || ""}
-                  onChange={(e) =>
-                    setProfile({ ...profile, phone: e.target.value })
-                  }
-                />
-              </div>
-
-              <Button
-                onClick={updateProfile}
-                disabled={saving}
-                className="rounded-xl"
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`block w-full text-left px-3 py-2 rounded ${
+                  activeTab === tab.id ? "bg-orange-500 text-white" : ""
+                }`}
               >
-                {saving ? "Saving..." : "Save Changes"}
-              </Button>
-            </motion.div>
-          )}
+                {tab.label}
+              </button>
+            ))}
 
-          {/* ================= ORDERS TAB ================= */}
-          {activeTab === "orders" && (
-            <motion.div
-              key="orders"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <h2 className="text-3xl font-semibold mb-8">
-                Previous Orders
-              </h2>
+            <button onClick={logout} className="mt-4 text-red-500">Logout</button>
+          </div>
 
-              {orders.length === 0 ? (
-                <p className="text-muted-foreground">
-                  You haven't placed any orders yet.
-                </p>
-              ) : (
-                <div className="space-y-6">
-                  {orders.map((o) => (
-                    <motion.div
-                      key={o._id}
-                      whileHover={{ scale: 1.02 }}
-                      className="
-                        bg-white
-                        border
-                        rounded-2xl
-                        p-6
-                        shadow-lg
-                        transition
-                      "
-                    >
-                      <div className="flex justify-between items-center">
+          {/* ================= CONTENT ================= */}
+          <div className="lg:col-span-3">
 
-                        <div>
-                          <p className="font-semibold">
-                            Order #{o._id.slice(-6)}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {new Date(o.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
+            <AnimatePresence mode="wait">
 
-                        <span
-                          className={`text-xs px-3 py-1 rounded-full ${statusColor(
-                            o.status
-                          )}`}
-                        >
-                          {o.status}
-                        </span>
-                      </div>
+              {/* ================= PROFILE ================= */}
+              {activeTab === "profile" && (
+                <motion.div key="profile" initial={{opacity:0}} animate={{opacity:1}}>
+                  <h2 className="text-2xl font-bold mb-4">Profile</h2>
 
-                      <p className="mt-4 text-lg font-bold">
-                        ₹ {o.total}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
+                  <Input
+                    value={profile?.fullName || ""}
+                    onChange={e => setProfile({...profile, fullName: e.target.value})}
+                    disabled={!isEditing}
+                  />
+
+                  <Button onClick={() => setIsEditing(!isEditing)} className="mt-3">
+                    {isEditing ? "Cancel" : "Edit"}
+                  </Button>
+
+                  {isEditing && (
+                    <Button onClick={updateProfile} className="ml-2">Save</Button>
+                  )}
+                </motion.div>
               )}
-            </motion.div>
-          )}
-        </motion.div>
+
+              {/* ================= ORDERS ================= */}
+              {activeTab === "orders" && (
+                <motion.div key="orders" initial={{opacity:0}} animate={{opacity:1}}>
+                  <h2 className="text-2xl font-bold mb-4">Orders</h2>
+
+                  {orders.map(order => {
+                    const StatusIcon = getStatusConfig(order.status).icon;
+                    return (
+                      <div key={order._id} className="p-4 border rounded mb-3">
+                        <StatusIcon className="inline mr-2"/>
+                        ₹{order.total}
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              )}
+
+              {/* ================= WISHLIST ================= */}
+              {activeTab === "wishlist" && (
+                <motion.div key="wishlist" initial={{opacity:0}} animate={{opacity:1}}>
+                  <h2 className="text-2xl font-bold mb-6">My Wishlist</h2>
+
+                  {loadingWishlist ? (
+                    <p>Loading wishlist...</p>
+                  ) : wishlistItems.length === 0 ? (
+                    <p>No items in wishlist</p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {wishlistItems.map(item => (
+                        <ProductCard key={item._id} product={item.productId}/>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {/* ================= SETTINGS ================= */}
+              {activeTab === "settings" && (
+                <motion.div key="settings" initial={{opacity:0}} animate={{opacity:1}}>
+                  <h2 className="text-2xl font-bold">Settings</h2>
+                </motion.div>
+              )}
+
+            </AnimatePresence>
+
+          </div>
+        </div>
       </div>
     </div>
   );

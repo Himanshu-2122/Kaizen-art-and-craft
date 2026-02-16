@@ -22,45 +22,52 @@ import { AdminLayout, AdminPage } from "@/pages/admin";
 import OrdersTable from "@/pages/admin/components/OrdersTable";
 import ProductsTable from "@/pages/admin/components/ProductsTable";
 import UsersTable from "@/pages/admin/components/UsersTable";
+import "./styles/GlobalAnimations.css";
+import { WishlistProvider } from "./contexts/WishlistContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <CartProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Index />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/collections" element={<CollectionsPage />} />
-                <Route
-                  path="/collections/:slug"
-                  element={<CollectionsPage />}
-                />
-                <Route path="/product/:slug" element={<ProductDetailPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/wishlist" element={<WishlistPage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminPage />} />
-                  <Route path="products" element={<ProductsTable />} />
-                  <Route path="orders" element={<OrdersTable />} />
-                  <Route path="users" element={<UsersTable />} />
+      <WishlistProvider>
+        <CartProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/collections" element={<CollectionsPage />} />
+                  <Route
+                    path="/collections/:slug"
+                    element={<CollectionsPage />}
+                  />
+                  <Route
+                    path="/product/:slug"
+                    element={<ProductDetailPage />}
+                  />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/wishlist" element={<WishlistPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/admin" element={<AdminLayout />}>
+                    <Route index element={<AdminPage />} />
+                    <Route path="products" element={<ProductsTable />} />
+                    <Route path="orders" element={<OrdersTable />} />
+                    <Route path="users" element={<UsersTable />} />
+                  </Route>
                 </Route>
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CartProvider>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

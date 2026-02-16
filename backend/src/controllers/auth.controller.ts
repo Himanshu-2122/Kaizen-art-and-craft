@@ -145,7 +145,7 @@ export const logout = (_req: Request, res: Response) => {
     .json({ message: "Logged out successfully" });
 };
 
-export const profile = async (req: any, res: Response) => {
+export const getProfile = async (req: any, res: Response) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
 
@@ -161,5 +161,31 @@ export const profile = async (req: any, res: Response) => {
     });
   } catch {
     res.status(500).json({ message: "Failed to fetch profile" });
+  }
+};
+
+export const updateProfile = async (req: any, res: Response) => {
+  try {
+    const { fullName, phone } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
+
+    user.fullName = fullName || user.fullName;
+    user.phone = phone || user.phone;
+
+    await user.save();
+
+    res.json({
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    });
+  } catch {
+    res.status(500).json({ message: "Failed to update profile" });
   }
 };

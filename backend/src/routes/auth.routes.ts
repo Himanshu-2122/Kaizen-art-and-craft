@@ -4,7 +4,8 @@ import {
   login,
   // refresh,
   logout,
-  profile
+  getProfile,
+  updateProfile
 } from "../controllers/auth.controller";
 
 import {
@@ -34,7 +35,9 @@ router.post("/logout", logout);
 // PRIVATE ROUTES
 // ========================
 
-router.get("/profile", protect, profile);
+router.get("/profile", protect, getProfile);
+router.put("/profile", protect, updateProfile);
+
 
 
 // ========================
