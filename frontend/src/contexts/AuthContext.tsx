@@ -23,6 +23,16 @@ type AuthContextType = {
     email: string;
     password: string;
   }) => Promise<void>;
+  sendOTP: (phone: string, purpose: "signup" | "login") => Promise<void>;
+  verifyLoginOTP: (phone: string, code: string) => Promise<void>;
+  verifySignupOTP: (data: {
+    phone: string;
+    code: string;
+    fullName: string;
+    username: string;
+    email: string;
+    password: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -87,6 +97,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(data.user);
   };
 
+  /* ---------- SEND OTP ---------- */
+  const sendOTP = async (phone: string, purpose: "signup" | "login") => {
+    await api.post("/otp/send", { phone, purpose });
+  };
+
+  /* ---------- VERIFY LOGIN OTP ---------- */
+  const verifyLoginOTP = async (phone: string, code: string) => {
+    const { data } = await api.post("/otp/verify-login", { phone, code });
+    localStorage.setItem("token", data.accessToken);
+    setUser(data.user);
+  };
+
+  /* ---------- VERIFY SIGNUP OTP ---------- */
+  const verifySignupOTP = async (payload: {
+    phone: string;
+    code: string;
+    fullName: string;
+    username: string;
+    email: string;
+    password: string;
+  }) => {
+    const { data } = await api.post("/otp/verify-signup", payload);
+    localStorage.setItem("token", data.accessToken);
+    setUser(data.user);
+  };
+
   /* ---------- LOGOUT ---------- */
   const logout = async () => {
     try {
@@ -99,7 +135,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, isAdmin, signIn, signUp, logout }} // ✅ PASS
+      value={{ user, loading, isAdmin, signIn, signUp, sendOTP, verifyLoginOTP, verifySignupOTP, logout }} // ✅ PASS
     >
       {children}
     </AuthContext.Provider>

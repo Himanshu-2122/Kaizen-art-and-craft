@@ -1,32 +1,52 @@
 import { Router } from "express";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { ContactMessage } from "../models/contact.model";
 
 dotenv.config();
 
 const router = Router();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 router.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    await resend.emails.send({
-      from: "Kaizen Art <onboarding@resend.dev>",
-      to: "hi.himanshu21@gmail.com", // your inbox
-      subject: "New Contact Message",
-      html: `
-        <h3>New Message</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b> ${message}</p>
-      `,
-    });
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "Name, email, and message are required" });
+    }
+
+    await ContactMessage.create({ name, email, message });
+
+    try {
+      const info = await transporter.sendMail({
+        from: `"Kaizen Art" <${process.env.GMAIL_USER}>`,
+        to: "hi.himanshu21@gmail.com",
+        subject: `New Contact Message from ${name}`,
+        html: `
+          <h3>New Contact Message</h3>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Message:</b> ${message}</p>
+        `,
+      });
+
+      console.log("Email sent successfully, id:", info.messageId);
+    } catch (emailErr) {
+      console.error("Failed to send email via Gmail SMTP:", emailErr);
+    }
 
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ message: "Email failed" });
+    console.error("Contact route error:", err);
+    res.status(500).json({ message: "Failed to save your message. Please try again." });
   }
 });
 

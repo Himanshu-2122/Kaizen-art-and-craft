@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
@@ -11,12 +11,17 @@ import {
   Phone,
   ArrowRight,
   Sparkles,
-  ShoppingBag
+  ShoppingBag,
+  Smartphone,
+  ArrowLeft,
+  Timer,
+  RefreshCw
 } from "lucide-react";
 import { toast } from "sonner";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 export default function AuthPage() {
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn, sendOTP, verifyLoginOTP, verifySignupOTP } = useAuth();
   const navigate = useNavigate();
 
   const [isLogin, setIsLogin] = useState(true);
@@ -33,6 +38,26 @@ export default function AuthPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // OTP login state
+  const [otpMode, setOtpMode] = useState(false);
+  const [otpStep, setOtpStep] = useState<"phone" | "verify">("phone");
+  const [otpPhone, setOtpPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+
+  // Signup OTP state
+  const [signupOtpStep, setSignupOtpStep] = useState<"form" | "verify">("form");
+  const [signupOtpCode, setSignupOtpCode] = useState("");
+
+  // OTP countdown timer
+  useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const timer = setTimeout(() => setOtpCountdown(otpCountdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [otpCountdown]);
+
   if (loading) return null;
   if (user) return <Navigate to="/" replace />;
 
@@ -47,21 +72,120 @@ export default function AuthPage() {
       if (isLogin) {
         await signIn(form.email, form.password);
         toast.success("Welcome back! 🎉");
+        navigate("/");
       } else {
-        await signUp({
-          fullName: form.fullName,
-          username: form.username,
-          email: form.email,
-          password: form.password,
-        });
-        toast.success("Account created successfully! 🎉");
+        if (!form.mobilenumber.trim()) {
+          toast.error("Please enter your mobile number");
+          return;
+        }
+        await sendOTP(form.mobilenumber.trim(), "signup");
+        toast.success("OTP sent to your phone! 📱");
+        setSignupOtpStep("verify");
+        setOtpCountdown(60);
+        setSignupOtpCode("");
       }
-
-      navigate("/");
     } catch (err: any) {
-      toast.error(err?.message || "Something went wrong");
+      toast.error(err?.response?.data?.message || err?.message || "Something went wrong");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleSendOTP = async () => {
+    if (!otpPhone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+    setOtpSending(true);
+    try {
+      await sendOTP(otpPhone.trim(), "login");
+      toast.success("OTP sent to your phone! 📱");
+      setOtpStep("verify");
+      setOtpCountdown(60);
+      setOtpCode("");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (otpCode.length !== 6) {
+      toast.error("Please enter the complete 6-digit OTP");
+      return;
+    }
+    setOtpVerifying(true);
+    try {
+      await verifyLoginOTP(otpPhone.trim(), otpCode);
+      toast.success("Welcome back! 🎉");
+      navigate("/");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "OTP verification failed");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (otpCountdown > 0) return;
+    setOtpSending(true);
+    try {
+      await sendOTP(otpPhone.trim(), "login");
+      toast.success("OTP resent! 📱");
+      setOtpCountdown(60);
+      setOtpCode("");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const resetOtpFlow = () => {
+    setOtpMode(false);
+    setOtpStep("phone");
+    setOtpPhone("");
+    setOtpCode("");
+    setOtpCountdown(0);
+  };
+
+  const handleVerifySignupOTP = async () => {
+    if (signupOtpCode.length !== 6) {
+      toast.error("Please enter the complete 6-digit OTP");
+      return;
+    }
+    setOtpVerifying(true);
+    try {
+      await verifySignupOTP({
+        phone: form.mobilenumber.trim(),
+        code: signupOtpCode,
+        fullName: form.fullName,
+        username: form.username,
+        email: form.email,
+        password: form.password,
+      });
+      toast.success("Account created successfully! 🎉");
+      navigate("/");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "OTP verification failed");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
+  const handleResendSignupOTP = async () => {
+    if (otpCountdown > 0) return;
+    setOtpSending(true);
+    try {
+      await sendOTP(form.mobilenumber.trim(), "signup");
+      toast.success("OTP resent! 📱");
+      setOtpCountdown(60);
+      setSignupOtpCode("");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setOtpSending(false);
     }
   };
 
@@ -141,16 +265,26 @@ export default function AuthPage() {
             {/* Heading */}
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {isLogin ? "Welcome Back!" : "Create Account"}
+                {isLogin
+                  ? otpMode
+                    ? "Login with OTP"
+                    : "Welcome Back!"
+                  : signupOtpStep === "verify"
+                    ? "Verify Phone"
+                    : "Create Account"}
               </h2>
               <p className="text-gray-600 text-sm">
                 {isLogin
-                  ? "Login to continue your shopping"
-                  : "Join us for exclusive deals and offers"}
+                  ? otpMode
+                    ? "Verify your phone number to login"
+                    : "Login to continue your shopping"
+                  : signupOtpStep === "verify"
+                    ? "Enter the OTP sent to your phone"
+                    : "Join us for exclusive deals and offers"}
               </p>
               
               {/* Badge */}
-              {!isLogin && (
+              {!isLogin && signupOtpStep === "form" && (
                 <div className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-gradient-to-r from-[#E67235]/10 to-amber-500/10 rounded-full">
                   <Sparkles className="w-4 h-4 text-[#E67235]" />
                   <span className="text-xs font-semibold text-gray-700">
@@ -161,6 +295,265 @@ export default function AuthPage() {
             </div>
 
             {/* Form */}
+            {!isLogin && signupOtpStep === "verify" ? (
+              /* ========== SIGNUP OTP VERIFICATION ========== */
+              <div className="space-y-5 animate-slide-down">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">
+                    OTP sent to <span className="font-semibold text-gray-900">{form.mobilenumber}</span>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setSignupOtpStep("form"); setSignupOtpCode(""); }}
+                    className="text-xs text-[#E67235] hover:underline mt-1"
+                  >
+                    Edit details
+                  </button>
+                </div>
+
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={signupOtpCode}
+                    onChange={setSignupOtpCode}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                      <InputOTPSlot index={1} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                      <InputOTPSlot index={2} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                      <InputOTPSlot index={3} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                      <InputOTPSlot index={4} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                      <InputOTPSlot index={5} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+
+                {/* Resend / Countdown */}
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  {otpCountdown > 0 ? (
+                    <span className="flex items-center gap-1.5 text-gray-500">
+                      <Timer className="w-4 h-4" />
+                      Resend in {otpCountdown}s
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendSignupOTP}
+                      disabled={otpSending}
+                      className="flex items-center gap-1.5 text-[#E67235] hover:text-[#d66330] font-medium hover:underline transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${otpSending ? "animate-spin" : ""}`} />
+                      Resend OTP
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleVerifySignupOTP}
+                  disabled={otpVerifying || signupOtpCode.length !== 6}
+                  className="relative w-full bg-gradient-to-r from-[#E67235] to-amber-500 text-white rounded-2xl py-4 font-semibold hover:shadow-lg hover:shadow-[#E67235]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  <span className="relative flex items-center justify-center gap-2">
+                    {otpVerifying ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Creating account...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>VERIFY & CREATE ACCOUNT</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </span>
+                </button>
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-4 bg-white text-gray-500">OR</span>
+                  </div>
+                </div>
+
+                {/* Back to login */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsLogin(true);
+                    setSignupOtpStep("form");
+                    setSignupOtpCode("");
+                    setOtpCountdown(0);
+                    setForm({ fullName: "", username: "", email: "", mobilenumber: "", password: "" });
+                  }}
+                  className="w-full border-2 border-gray-200 rounded-2xl py-3.5 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-medium text-gray-700 group"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Back to login
+                  </span>
+                </button>
+              </div>
+            ) : isLogin && otpMode ? (
+              /* ========== OTP LOGIN FLOW ========== */
+              <div className="space-y-4 animate-slide-down">
+                {otpStep === "phone" ? (
+                  /* --- Step 1: Phone Input --- */
+                  <div className="space-y-4">
+                    <div className="relative group">
+                      <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#E67235] transition-colors duration-300" />
+                      <input
+                        type="tel"
+                        placeholder="Phone Number (e.g. +919876543210)"
+                        value={otpPhone}
+                        onChange={(e) => setOtpPhone(e.target.value)}
+                        className="w-full border-2 border-gray-200 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-[#E67235] focus:ring-4 focus:ring-[#E67235]/10 transition-all duration-300 text-sm placeholder:text-gray-400 hover:border-gray-300"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSendOTP}
+                      disabled={otpSending}
+                      className="relative w-full bg-gradient-to-r from-[#E67235] to-amber-500 text-white rounded-2xl py-4 font-semibold hover:shadow-lg hover:shadow-[#E67235]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <span className="relative flex items-center justify-center gap-2">
+                        {otpSending ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Sending OTP...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>SEND OTP</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                ) : (
+                  /* --- Step 2: OTP Verification --- */
+                  <div className="space-y-5 animate-slide-down">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600">
+                        OTP sent to <span className="font-semibold text-gray-900">{otpPhone}</span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => { setOtpStep("phone"); setOtpCode(""); }}
+                        className="text-xs text-[#E67235] hover:underline mt-1"
+                      >
+                        Change number
+                      </button>
+                    </div>
+
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={setOtpCode}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                          <InputOTPSlot index={1} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                          <InputOTPSlot index={2} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                          <InputOTPSlot index={3} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                          <InputOTPSlot index={4} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                          <InputOTPSlot index={5} className="w-12 h-12 text-lg border-2 border-gray-200 rounded-xl first:rounded-l-xl last:rounded-r-xl focus-within:border-[#E67235] focus-within:ring-2 focus-within:ring-[#E67235]/20" />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+
+                    {/* Resend / Countdown */}
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                      {otpCountdown > 0 ? (
+                        <span className="flex items-center gap-1.5 text-gray-500">
+                          <Timer className="w-4 h-4" />
+                          Resend in {otpCountdown}s
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleResendOTP}
+                          disabled={otpSending}
+                          className="flex items-center gap-1.5 text-[#E67235] hover:text-[#d66330] font-medium hover:underline transition-colors disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-4 h-4 ${otpSending ? "animate-spin" : ""}`} />
+                          Resend OTP
+                        </button>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleVerifyOTP}
+                      disabled={otpVerifying || otpCode.length !== 6}
+                      className="relative w-full bg-gradient-to-r from-[#E67235] to-amber-500 text-white rounded-2xl py-4 font-semibold hover:shadow-lg hover:shadow-[#E67235]/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                      <span className="relative flex items-center justify-center gap-2">
+                        {otpVerifying ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>VERIFY & LOGIN</span>
+                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Divider */}
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="px-4 bg-white text-gray-500">OR</span>
+                  </div>
+                </div>
+
+                {/* Back to password login */}
+                <button
+                  type="button"
+                  onClick={resetOtpFlow}
+                  className="w-full border-2 border-gray-200 rounded-2xl py-3.5 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-medium text-gray-700 group"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Login with password
+                  </span>
+                </button>
+
+                {/* Switch to signup */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetOtpFlow();
+                    setIsLogin(false);
+                    setForm({ fullName: "", username: "", email: "", mobilenumber: "", password: "" });
+                  }}
+                  className="w-full border-2 border-gray-200 rounded-2xl py-3.5 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-medium text-gray-700 group"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    Create new account
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </button>
+              </div>
+            ) : (
+            /* ========== STANDARD EMAIL/PASSWORD FORM ========== */
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div className="space-y-4 animate-slide-down">
@@ -300,11 +693,28 @@ export default function AuthPage() {
                 </div>
               </div>
 
+              {/* OTP Login Button (only in login mode) */}
+              {isLogin && (
+                <button
+                  type="button"
+                  onClick={() => setOtpMode(true)}
+                  className="w-full border-2 border-gray-200 rounded-2xl py-3.5 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 font-medium text-gray-700 group"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <Smartphone className="w-4 h-4 text-[#E67235]" />
+                    Login with OTP
+                  </span>
+                </button>
+              )}
+
               {/* Switch Mode Button */}
               <button
                 type="button"
                 onClick={() => {
                   setIsLogin(!isLogin);
+                  setSignupOtpStep("form");
+                  setSignupOtpCode("");
+                  resetOtpFlow();
                   setForm({
                     fullName: "",
                     username: "",
@@ -321,9 +731,10 @@ export default function AuthPage() {
                 </span>
               </button>
             </form>
+            )}
 
             {/* Terms & Privacy */}
-            {!isLogin && (
+            {!isLogin && signupOtpStep === "form" && (
               <p className="text-xs text-center text-gray-500 mt-6 animate-fade-in">
                 By creating an account, you agree to our{" "}
                 <a href="/terms" className="text-[#E67235] hover:underline">

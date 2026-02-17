@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes";
 import orderRoutes from "./routes/order.routes";
 import contactRoutes from "./routes/contact.routes";
 import wishlistRoutes from "./routes/wishlist.routes";
+import otpRoutes from "./routes/otp.routes";
 
 dotenv.config();
 
@@ -24,7 +25,7 @@ app.use(cors({
 
 /* ---------- Routes ---------- */
 app.use("/api/v1/products", productRoutes);
-app.use("/api/categories", categoryRoutes);
+app.use("/api/v1/categories", categoryRoutes);
 
 /* ---------- auth ---------- */
 app.use("/api/v1/user", authRoutes);
@@ -39,6 +40,11 @@ app.use("/api/v1", contactRoutes);
 
 app.use("/api/v1/wishlist", wishlistRoutes);
 
+/* ---------- OTP auth ---------- */
+app.use("/api/v1/otp", otpRoutes);
+console.log("🔥 OTP ROUTE REGISTERED");
+
+
 
  
 
@@ -46,3 +52,5 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 
 
 export default app;
+
+

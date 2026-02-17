@@ -6,7 +6,7 @@ import { User } from "../models/user.model";
 const ACCESS_EXPIRE = "15m";
 const REFRESH_EXPIRE = "7d";
 
-const generateTokens = (user: any) => {
+export const generateTokens = (user: any) => {
   const payload = {
     id: user._id,
     role: user.role,
