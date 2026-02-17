@@ -11,8 +11,18 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api/v1/uploads': {
+        target: 'http://localhost:5000', // Assuming backend runs on port 5000
+        changeOrigin: true,
+        rewrite: (path) => path, // No rewrite needed, path is already /api/v1/uploads
+      },
+    },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    // mode === "development" && componentTagger(), // Temporarily removed for debugging
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -80,7 +80,7 @@ export const createProduct = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Maximum 10 images allowed" });
     }
 
-    const images = files.map(f => `/uploads/products/${f.filename}`);
+    const images = files.map(f => `/api/v1/uploads/products/${f.filename}`);
 
     /* ---------- slug ---------- */
     const slug = slugify(`${name}-${Date.now()}`, {
@@ -213,7 +213,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         : req.body.existingImages)
       : [];
 
-    const newImages = files ? files.map(f => `/uploads/products/${f.filename}`) : [];
+    const newImages = files ? files.map(f => `/api/v1/uploads/products/${f.filename}`) : [];
     const allImages = [...existingImages, ...newImages];
 
     if (allImages.length > 0) {
@@ -234,7 +234,7 @@ export const updateProduct = async (req: Request, res: Response) => {
       updates.discountPercentage = 0;
     }
 
-    const product = await Product.findByIdAndUpdate(id, { ...updates, discountPercentage: updates.discountPercentage }, { new: true });
+    const product = await Product.findByIdAndUpdate(id, { ...updates, discountPercentage: updates.discountPercentage }, { new: true, runValidators: true });
 
     res.json(product);
 
@@ -409,10 +409,7 @@ export const addReview = async (req: Request, res: Response) => {
     product.reviews.push({ userId, rating: Number(rating), comment });
 
     /* ---------- auto-calculate rating ---------- */
-    product.numReviews = product.reviews.length;
-    product.averageRating =
-      product.reviews.reduce((sum, r) => sum + r.rating, 0) /
-      product.reviews.length;
+    product.calculateRatings();
 
     await product.save();
 

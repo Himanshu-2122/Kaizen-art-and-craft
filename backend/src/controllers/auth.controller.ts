@@ -189,3 +189,17 @@ export const updateProfile = async (req: any, res: Response) => {
     res.status(500).json({ message: "Failed to update profile" });
   }
 };
+
+// ========================
+// GET ALL USERS (Admin)
+// ========================
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find({}).select("-password"); // Exclude password field
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch all users" });
+  }
+};
+

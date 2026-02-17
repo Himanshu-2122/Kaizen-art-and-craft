@@ -54,7 +54,6 @@ export interface ProductDocument extends Document {
 
   averageRating: number;
   numReviews: number;
-
   reviews: Review[];
 
   calculateRatings(): void;

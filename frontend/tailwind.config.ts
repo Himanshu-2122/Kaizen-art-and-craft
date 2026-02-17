@@ -14,10 +14,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "sans-serif"],
+        sans: ["Poppins", "sans-serif"],
         display: ["Playfair Display", "serif"],
       },
       colors: {
+        'ws-brown': '#5a3825',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

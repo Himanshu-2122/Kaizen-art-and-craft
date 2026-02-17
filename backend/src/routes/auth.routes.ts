@@ -5,7 +5,8 @@ import {
   // refresh,
   logout,
   getProfile,
-  updateProfile
+  updateProfile,
+  getAllUsers
 } from "../controllers/auth.controller";
 
 import {
@@ -47,6 +48,8 @@ router.put("/profile", protect, updateProfile);
 router.get("/admin", protect, isAdmin, (_req, res) => {
   res.json({ message: "Welcome Admin" });
 });
+
+router.get("/users", protect, isAdmin, getAllUsers);
 
 
 export default router;

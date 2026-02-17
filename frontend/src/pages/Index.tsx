@@ -503,7 +503,6 @@ export default function Index() {
               {featured.map((product, idx) => (
                 <div
                   key={product._id}
-                  className="animate-fade-in-up"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <ProductCard product={product} />

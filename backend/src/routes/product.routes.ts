@@ -26,8 +26,8 @@ router.post("/:id/check-availability", checkAvailability);
 router.post("/:id/reviews", protect, addReview);
 
 /* ---------- ADMIN ---------- */
-router.post("/", protect, isAdmin, uploadImages.array("images", 10), createProduct);
-router.put("/:id", protect, isAdmin, uploadImages.array("images", 10), updateProduct);
+router.post("/", protect, isAdmin, uploadImages.array("images"), createProduct);
+router.put("/:id", protect, isAdmin, uploadImages.array("images"), updateProduct);
 router.delete("/:id", protect, isAdmin, deleteProduct);
 
 export default router;
