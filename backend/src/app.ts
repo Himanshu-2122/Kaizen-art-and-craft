@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import dotenv from "dotenv";
 import productRoutes from "./routes/product.routes";
 import categoryRoutes from "./routes/category.routes";
@@ -14,7 +15,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-// app.use("/images", express.static("public/images"));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 
 /* ---------- CORS ---------- */

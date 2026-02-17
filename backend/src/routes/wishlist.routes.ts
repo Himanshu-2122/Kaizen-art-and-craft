@@ -52,10 +52,14 @@ router.post("/", protect, async (req: AuthRequest, res) => {
 });
 
 /* ================= REMOVE FROM WISHLIST ================= */
-router.delete("/:productId", protect, async (req: AuthRequest, res) => {
+router.delete("/", protect, async (req: AuthRequest, res) => {
   try {
 
-    const { productId } = req.params;
+    const { productId } = req.body;
+
+    if (!productId) {
+      return res.status(400).json({ message: "productId is required" });
+    }
 
     await Wishlist.deleteOne({
       userId: req.user!.id,

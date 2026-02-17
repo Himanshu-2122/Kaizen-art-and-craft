@@ -89,7 +89,7 @@ All API endpoints are versioned under `/api/v1/` (with categories at `/api/categ
 | `/api/v1/products`    | Products   | `GET /`, `GET /:id`, `GET /slug/:slug`, `POST`, `PUT`, `DELETE` |
 | `/api/v1/user`        | Auth       | `POST /signup`, `POST /login`, `POST /logout`, `GET /profile`, `PUT /profile` |
 | `/api/v1/orders`      | Orders     | `POST /cart`, `POST /checkout`, `GET /my`             |
-| `/api/v1/wishlist`    | Wishlist   | `GET /`, `POST /`, `DELETE /:productId`               |
+| `/api/v1/wishlist`    | Wishlist   | `GET /`, `POST /`, `DELETE /`               |
 | `/api/v1/contact`     | Contact    | `POST /contact` (sends email via Resend)              |
 | `/api/categories`     | Categories | `GET /`, `GET /:id/products`                          |
 

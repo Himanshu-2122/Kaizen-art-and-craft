@@ -5,19 +5,29 @@ import {
   getProductBySlug,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  addReview,
+  checkAvailability
 } from "../controllers/product.controller";
+import { protect, isAdmin } from "../middleware/auth.middleware";
+import { uploadImages } from "../middleware/upload";
 
 const router = express.Router();
 
-/* ⭐ IMPORTANT ORDER */
-
-router.get("/slug/:slug", getProductBySlug);  // first
+/* ---------- PUBLIC ---------- */
+router.get("/slug/:slug", getProductBySlug);
 router.get("/", getProducts);
 router.get("/:id", getProductById);
 
-router.post("/", createProduct);
-router.put("/:id", updateProduct);
-router.delete("/:id", deleteProduct);
+/* ---------- AVAILABILITY CHECK (public) ---------- */
+router.post("/:id/check-availability", checkAvailability);
+
+/* ---------- REVIEWS (authenticated) ---------- */
+router.post("/:id/reviews", protect, addReview);
+
+/* ---------- ADMIN ---------- */
+router.post("/", protect, isAdmin, uploadImages.array("images", 10), createProduct);
+router.put("/:id", protect, isAdmin, uploadImages.array("images", 10), updateProduct);
+router.delete("/:id", protect, isAdmin, deleteProduct);
 
 export default router;
