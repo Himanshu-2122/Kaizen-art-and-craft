@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import Layout from "@/components/layout/Layout";
 import Index from "./pages/Index";
 import ShopPage from "./pages/ShopPage";
@@ -22,12 +23,14 @@ import { AdminLayout, AdminPage } from "@/pages/admin";
 import OrdersTable from "@/pages/admin/components/OrdersTable";
 import ProductsTable from "@/pages/admin/components/ProductsTable";
 import UsersTable from "@/pages/admin/components/UsersTable";
+import AdminGuard from "@/components/AdminGuard";
 import "./styles/GlobalAnimations.css";
 import { WishlistProvider } from "./contexts/WishlistContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ThemeProvider>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <WishlistProvider>
@@ -35,7 +38,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Routes>
                 <Route element={<Layout />}>
                   <Route path="/" element={<Index />} />
@@ -55,7 +58,7 @@ const App = () => (
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/admin" element={<AdminLayout />}>
+                  <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
                     <Route index element={<AdminPage />} />
                     <Route path="products" element={<ProductsTable />} />
                     <Route path="orders" element={<OrdersTable />} />
@@ -70,6 +73,7 @@ const App = () => (
       </WishlistProvider>
     </AuthProvider>
   </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

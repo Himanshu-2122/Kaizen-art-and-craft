@@ -126,7 +126,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   /* ---------- LOGOUT ---------- */
   const logout = async () => {
     try {
-      await api.post("/api/v1/user/logout");
+      await api.post("/user/logout");
+    } catch {
+      // ignore network errors — clear session regardless
     } finally {
       localStorage.removeItem("token");
       setUser(null);

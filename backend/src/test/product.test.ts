@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import app from '../app';
 import { Product } from '../models/product.model';
 import { User } from '../models/user.model';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 let mongoServer: MongoMemoryServer;
 let adminToken: string;
@@ -53,7 +53,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -85,7 +85,7 @@ describe('Product API', () => {
         .field('price', '-100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -105,7 +105,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '-200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -125,7 +125,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -145,7 +145,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -166,7 +166,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -207,7 +207,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -228,7 +228,7 @@ describe('Product API', () => {
         .field('price', '100')
         .field('mrpPrice', '200')
         .field('category', 'Test Category')
-        .field('storageType', 'Box Storage')
+        .field('storageType', 'Without Storage')
         .field('materialType', 'Wood')
         .field('finishType', 'Matte')
         .field('netWeight', '10')
@@ -293,7 +293,7 @@ describe('Product API', () => {
         price: 100,
         mrpPrice: 200,
         category: 'Test Category',
-        storageType: 'Box Storage',
+        storageType: 'Without Storage',
         materialType: 'Wood',
         finishType: 'Matte',
         netWeight: 10,
@@ -335,7 +335,7 @@ describe('Product API', () => {
         name: 'Product with images to replace',
         slug: 'product-with-images-to-replace',
         description: 'Desc',
-        price: 100, mrpPrice: 200, category: 'Cat', storageType: 'Box Storage',
+        price: 100, mrpPrice: 200, category: 'Cat', storageType: 'Without Storage',
         materialType: 'Wood', finishType: 'Matte', netWeight: 10, warrantyMonths: 12,
         dimensions: { length: 10, width: 10, height: 10 },
         sizes: ['S'], images: ['/uploads/products/old-image.jpg']
@@ -356,7 +356,7 @@ describe('Product API', () => {
         name: 'Product with existing images',
         slug: 'product-with-existing-images',
         description: 'Desc',
-        price: 100, mrpPrice: 200, category: 'Cat', storageType: 'Box Storage',
+        price: 100, mrpPrice: 200, category: 'Cat', storageType: 'Without Storage',
         materialType: 'Wood', finishType: 'Matte', netWeight: 10, warrantyMonths: 12,
         dimensions: { length: 10, width: 10, height: 10 },
         sizes: ['S'],

@@ -4,14 +4,15 @@ import { Request, Response, NextFunction } from "express";
 export const protect = (req: any, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(" ")[1];
 
-  if (!token) return res.sendStatus(401);
+  if (!token) return res.status(401).json({ message: "No token provided" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
     req.user = decoded;
     next();
-  } catch {
-    res.sendStatus(403);
+  } catch (err: any) {
+    const message = err?.name === "TokenExpiredError" ? "Token expired" : "Invalid token";
+    return res.status(401).json({ message });
   }
 };
 

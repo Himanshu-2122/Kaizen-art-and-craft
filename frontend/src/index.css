@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 /* GlobalAnimations ko import karo */
 @import './styles/GlobalAnimations.css';
 @tailwind base;
@@ -101,7 +101,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
   }
   h1, h2, h3, h4 {
     font-family: 'Playfair Display', serif;
@@ -126,4 +127,88 @@
 .animate-slideIn {
   animation: slideIn 0.25s ease-out;
 }
+
+
+@theme {
+  --animate-marquee: marquee 35s linear infinite;
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+}
+
+/* ============================================================
+   DARK MODE — Global Overrides
+   These cover hardcoded Tailwind colors used across the site.
+   CSS variables in :root/.dark above handle shadcn components.
+   ============================================================ */
+
+/* ── Whites & Light Grays → Dark Surfaces ── */
+.dark .bg-white          { background-color: hsl(var(--card)); }
+.dark .bg-gray-50        { background-color: hsl(30 10% 9%); }
+.dark .bg-gray-100       { background-color: hsl(30 10% 13%); }
+.dark .bg-gray-200       { background-color: hsl(30 10% 17%); }
+.dark .bg-amber-50       { background-color: hsl(30 15% 10%); }
+
+/* ── Warm brand-cream backgrounds ── */
+.dark [class*="bg-[#FDF6ED]"] { background-color: hsl(30 15% 11%); }
+.dark [class*="bg-[#F9EDE3]"] { background-color: hsl(30 12% 13%); }
+.dark [class*="bg-[#f5ede3]"] { background-color: hsl(30 12% 13%); }
+.dark [class*="bg-[#f0e8de]"] { background-color: hsl(30 10% 13%); }
+.dark [class*="bg-[#ede3d8]"] { background-color: hsl(30 10% 13%); }
+
+/* ── Hover backgrounds ── */
+.dark [class*="hover:bg-[#F9EDE3]"]:hover { background-color: hsl(30 12% 15%); }
+.dark [class*="hover:bg-[#FDF6ED]"]:hover { background-color: hsl(30 15% 13%); }
+.dark .hover\:bg-gray-50:hover             { background-color: hsl(30 10% 12%); }
+.dark .hover\:bg-gray-100:hover            { background-color: hsl(30 10% 15%); }
+
+/* ── Gray text → readable in dark ── */
+.dark .text-gray-900 { color: hsl(40 20% 92%); }
+.dark .text-gray-800 { color: hsl(40 15% 85%); }
+.dark .text-gray-700 { color: hsl(40 12% 75%); }
+.dark .text-gray-600 { color: hsl(30 8% 62%); }
+.dark .text-gray-500 { color: hsl(30 6% 52%); }
+.dark .text-gray-400 { color: hsl(30 5% 42%); }
+
+/* ── Brand warm dark text ── */
+.dark [class*="text-[#1A0A00]"] { color: hsl(40 20% 90%); }
+.dark [class*="text-[#3B1F0A]"] { color: hsl(40 20% 90%); }
+.dark [class*="text-[#5C3A1E]"] { color: hsl(30 25% 72%); }
+
+/* ── Borders ── */
+.dark .border-gray-100              { border-color: hsl(var(--border)); }
+.dark .border-gray-200              { border-color: hsl(var(--border)); }
+.dark [class*="border-[#f0e8de]"]   { border-color: hsl(30 10% 20%); }
+.dark [class*="border-[#ede3d8]"]   { border-color: hsl(30 10% 20%); }
+.dark [class*="border-[#f5ede3]"]   { border-color: hsl(30 10% 20%); }
+
+/* ── Header / Navbar ── */
+.dark header {
+  background-color: hsl(30 12% 7%);
+  border-color: hsl(30 10% 16%);
+}
+
+/* ── Dropdown panels ── */
+.dark [class*="shadow-xl"].bg-white,
+.dark [class*="shadow-2xl"].bg-white {
+  background-color: hsl(30 10% 10%);
+}
+
+/* ── Inputs & Search ── */
+.dark input[class*="bg-[#FDF6ED]"] {
+  background-color: hsl(30 10% 12%);
+  color: hsl(var(--foreground));
+}
+.dark input[class*="bg-gray-50"],
+.dark input[class*="bg-gray-100"] {
+  background-color: hsl(30 10% 13%);
+  color: hsl(var(--foreground));
+}
+
+/* ── Placeholder text ── */
+.dark ::placeholder { color: hsl(30 8% 45%); }
+
+/* ── Focus ring on search ── */
+.dark input:focus { outline-color: hsl(var(--ring)); }
 

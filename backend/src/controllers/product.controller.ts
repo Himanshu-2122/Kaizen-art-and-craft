@@ -123,8 +123,9 @@ export const createProduct = async (req: Request, res: Response) => {
 
     res.status(201).json(product);
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
@@ -146,7 +147,7 @@ export const updateProduct = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const updates: Record<string, any> = {};
+    const updates: Record<string, unknown> = {};
 
     /* ---------- text fields ---------- */
     if (req.body.name) {
@@ -224,22 +225,20 @@ export const updateProduct = async (req: Request, res: Response) => {
     }
 
     /* ---------- recalculate discount ---------- */
-    const finalPrice = updates.price ?? existing.price;
-    const finalMrp = updates.mrpPrice ?? existing.mrpPrice;
-    if (finalMrp > 0 && finalPrice < finalMrp) {
-      updates.discountPercentage = Math.round(
-        ((finalMrp - finalPrice) / finalMrp) * 100
-      );
-    } else {
-      updates.discountPercentage = 0;
-    }
+    const finalPrice = (updates.price as number | undefined) ?? existing.price;
+    const finalMrp   = (updates.mrpPrice as number | undefined) ?? existing.mrpPrice;
+    updates.discountPercentage =
+      finalMrp > 0 && finalPrice < finalMrp
+        ? Math.round(((finalMrp - finalPrice) / finalMrp) * 100)
+        : 0;
 
     const product = await Product.findByIdAndUpdate(id, { ...updates, discountPercentage: updates.discountPercentage }, { new: true, runValidators: true });
 
     res.json(product);
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
@@ -256,16 +255,29 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
     res.json({ message: "Product removed successfully" });
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
 
 
 /* ======================================================
-   GET PRODUCTS (Filters + Pagination)
+   GET PRODUCTS (Filters + Pagination + Sorting)
 ====================================================== */
+
+type SortOrder = 1 | -1;
+type SortField = Record<string, SortOrder>;
+
+const SORT_MAP: Record<string, SortField> = {
+  newest:    { createdAt: -1 },
+  price_asc: { price: 1 },
+  price_desc: { price: -1 },
+  rating:    { averageRating: -1 },
+  discount:  { discountPercentage: -1 },
+};
+
 export const getProducts = async (req: Request, res: Response) => {
   try {
     const {
@@ -274,48 +286,60 @@ export const getProducts = async (req: Request, res: Response) => {
       featured,
       bestSeller,
       search,
+      sort = "newest",
+      minPrice,
+      maxPrice,
+      inStock,
+      minRating,
       page = 1,
-      limit = 50
+      limit = 50,
     } = req.query;
 
-    const filter: Record<string, any> = { isActive: true };
+    const filter: Record<string, unknown> = { isActive: true };
 
-    if (category) {
-      filter.category = String(category).toLowerCase();
-    }
-    if (collectionId) {
-      filter.collectionId = collectionId;
-    }
-    if (featured !== undefined) {
-      filter.featured = featured === "true";
-    }
-    if (bestSeller !== undefined) {
-      filter.bestSeller = bestSeller === "true";
-    }
-    if (search) {
-      filter.name = { $regex: search, $options: "i" };
+    if (category)     filter.category     = String(category).toLowerCase();
+    if (collectionId) filter.collectionId = collectionId;
+    if (featured  !== undefined) filter.featured   = featured   === "true";
+    if (bestSeller !== undefined) filter.bestSeller = bestSeller === "true";
+    if (search)   filter.name  = { $regex: String(search), $options: "i" };
+    if (inStock === "true") filter.stock = { $gt: 0 };
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      const priceFilter: { $gte?: number; $lte?: number } = {};
+      if (minPrice !== undefined) priceFilter.$gte = Number(minPrice);
+      if (maxPrice !== undefined) priceFilter.$lte = Number(maxPrice);
+      filter.price = priceFilter;
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
+    if (minRating !== undefined) {
+      filter.averageRating = { $gte: Number(minRating) };
+    }
 
-    const products = await Product.find(filter)
-      .populate("collectionId", "name slug")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .lean();
+    const sortObj: SortField = SORT_MAP[String(sort)] ?? SORT_MAP.newest;
+    const pageNum  = Math.max(1, Number(page));
+    const limitNum = Math.min(100, Math.max(1, Number(limit)));
+    const skip     = (pageNum - 1) * limitNum;
 
-    const total = await Product.countDocuments(filter);
+    const [products, total] = await Promise.all([
+      Product.find(filter)
+        .populate("collectionId", "name slug")
+        .sort(sortObj)
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Product.countDocuments(filter),
+    ]);
 
     res.json({
       products,
       total,
-      page: Number(page),
-      pages: Math.ceil(total / Number(limit))
+      page: pageNum,
+      pages: Math.ceil(total / limitNum),
     });
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
@@ -342,8 +366,9 @@ export const getProductById = async (req: Request, res: Response) => {
 
     res.json(product);
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
@@ -366,8 +391,9 @@ export const getProductBySlug = async (req: Request, res: Response) => {
 
     res.json(product);
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
@@ -419,8 +445,9 @@ export const addReview = async (req: Request, res: Response) => {
 
     res.status(201).json(updated);
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };
 
@@ -464,7 +491,8 @@ export const checkAvailability = async (req: Request, res: Response) => {
         : "Sorry, delivery is not available to this pin code"
     });
 
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Internal server error";
+    res.status(500).json({ message });
   }
 };

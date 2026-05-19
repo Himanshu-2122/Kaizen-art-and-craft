@@ -2,54 +2,32 @@ import { Router } from "express";
 import {
   signup,
   login,
-  // refresh,
+  refresh,
   logout,
   getProfile,
   updateProfile,
-  getAllUsers
+  changePassword,
+  getAllUsers,
 } from "../controllers/auth.controller";
-
-import {
-  protect,
-  isAdmin
-} from "../middleware/auth.middleware";
-
-import { AuthRequest } from "../type/request";
-import { User } from "../models/user.model";
+import { protect, isAdmin } from "../middleware/auth.middleware";
 
 const router = Router();
 
+/* ── PUBLIC ── */
+router.post("/signup",  signup);
+router.post("/login",   login);
+router.post("/logout",  logout);
+router.post("/refresh", refresh);
 
-// ========================
-// PUBLIC ROUTES
-// ========================
+/* ── PRIVATE ── */
+router.get("/profile",         protect, getProfile);
+router.put("/profile",         protect, updateProfile);
+router.put("/change-password", protect, changePassword);
 
-router.post("/signup", signup);
-router.post("/login", login);
-
-router.post("/logout", logout);
-// router.post("/refresh", refresh);
-// router.post("/logout", logout);
-
-
-// ========================
-// PRIVATE ROUTES
-// ========================
-
-router.get("/profile", protect, getProfile);
-router.put("/profile", protect, updateProfile);
-
-
-
-// ========================
-// ADMIN ROUTES
-// ========================
-
+/* ── ADMIN ── */
 router.get("/admin", protect, isAdmin, (_req, res) => {
   res.json({ message: "Welcome Admin" });
 });
-
 router.get("/users", protect, isAdmin, getAllUsers);
-
 
 export default router;

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pc\\\\Downloads\\\\Kaizen-art-and-craft\" -Recurse -Force)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\pc\\\\Downloads\\\\Kaizen-art-and-craft\\\\frontend\\\\src\" -Recurse -File -Include *.tsx, *.ts, *.css)",
+      "Read(//c/c/Users/pc/Downloads/Kaizen-art-and-craft/frontend/**)",
+      "Read(//c/c/Users/pc/Downloads/Kaizen-art-and-craft/backend/**)",
+      "Bash(xargs grep -l \"CartContext\\\\|useCart\\\\|CartProvider\")",
+      "Bash(npm run *)",
+      "Bash(dir C:\\\\Users\\\\pc\\\\Downloads\\\\Kaizen-art-and-craft *)"
+    ]
+  }
+}

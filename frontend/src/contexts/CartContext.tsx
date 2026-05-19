@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 export interface CartItem {
   id: string;
@@ -22,15 +22,35 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const STORAGE_KEY = "kaizen_cart";
+
+function loadCart(): CartItem[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? (JSON.parse(saved) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(loadCart);
+
+  // Persist cart to localStorage on every change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }, [items]);
 
   const addItem = useCallback((item: Omit<CartItem, "id" | "quantity"> & { quantity?: number }) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.product_id === item.product_id && i.size === item.size);
+      const existing = prev.find(
+        (i) => i.product_id === item.product_id && i.size === item.size
+      );
       if (existing) {
         return prev.map((i) =>
-          i.id === existing.id ? { ...i, quantity: i.quantity + (item.quantity || 1) } : i
+          i.id === existing.id
+            ? { ...i, quantity: i.quantity + (item.quantity || 1) }
+            : i
         );
       }
       return [...prev, { ...item, id: crypto.randomUUID(), quantity: item.quantity || 1 }];
@@ -49,13 +69,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const clearCart = useCallback(() => {
+    setItems([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
 
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}>
+    <CartContext.Provider
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, total, itemCount }}
+    >
       {children}
     </CartContext.Provider>
   );

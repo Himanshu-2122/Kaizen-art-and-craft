@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model";
 
@@ -55,8 +55,8 @@ export const signup = async (req: Request, res: Response) => {
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       })
       .status(201)
       .json({
@@ -94,8 +94,8 @@ export const login = async (req: Request, res: Response) => {
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       })
       .json({
         accessToken,
@@ -138,8 +138,8 @@ export const logout = (_req: Request, res: Response) => {
   res
     .clearCookie("refreshToken", {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     })
     .status(200)
     .json({ message: "Logged out successfully" });
@@ -195,11 +195,41 @@ export const updateProfile = async (req: any, res: Response) => {
 // ========================
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.find({}).select("-password"); // Exclude password field
+    const users = await User.find({}).select("-password");
     res.json(users);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch all users" });
+  }
+};
+
+// ========================
+// CHANGE PASSWORD
+// ========================
+export const changePassword = async (req: any, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Both current and new password are required" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ message: "New password must be at least 8 characters" });
+    }
+
+    const user = await User.findById(req.user.id).select("+password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) return res.status(400).json({ message: "Current password is incorrect" });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+  } catch {
+    res.status(500).json({ message: "Failed to change password" });
   }
 };
 

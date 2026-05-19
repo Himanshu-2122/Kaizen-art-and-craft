@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { OTP } from "../models/otp.model";
 import { User } from "../models/user.model";
 import { generateTokens } from "./auth.controller";
@@ -122,8 +122,8 @@ export const verifySignupOTP = async (req: Request, res: Response) => {
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       })
       .status(201)
       .json({
@@ -185,8 +185,8 @@ export const verifyLoginOTP = async (req: Request, res: Response) => {
     res
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       })
       .json({
         accessToken,

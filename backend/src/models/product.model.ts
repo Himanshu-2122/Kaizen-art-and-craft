@@ -23,7 +23,7 @@ export interface ProductDocument extends Document {
   collectionId?: mongoose.Types.ObjectId;
 
   sizes: string[];
-  storageType: "Box Storage" | "Hydraulic" | "Without Storage" | "Side Drawer";
+  storageType: "Without Storage" | "Ready to Hang" | "Freestanding" | "Packaged";
 
   price: number;
   mrpPrice: number;
@@ -137,7 +137,7 @@ const productSchema = new Schema<ProductDocument>(
     /* ---------- STORAGE TYPE ---------- */
     storageType: {
       type: String,
-      enum: ["Box Storage", "Hydraulic", "Without Storage", "Side Drawer"],
+      enum: ["Without Storage", "Ready to Hang", "Freestanding", "Packaged"],
       required: true
     },
 
@@ -278,9 +278,15 @@ productSchema.methods.calculateRatings = function (this: ProductDocument) {
 /* ======================================================
    INDEXES
 ====================================================== */
-productSchema.index({ category: 1 });
-productSchema.index({ collectionId: 1 });
+productSchema.index({ category: 1, isActive: 1 });
+productSchema.index({ collectionId: 1, isActive: 1 });
 productSchema.index({ slug: 1, isActive: 1 });
+productSchema.index({ price: 1, isActive: 1 });
+productSchema.index({ averageRating: -1, isActive: 1 });
+productSchema.index({ discountPercentage: -1, isActive: 1 });
+productSchema.index({ stock: 1, isActive: 1 });
+productSchema.index({ createdAt: -1, isActive: 1 });
+productSchema.index({ name: "text" });
 
 /* ======================================================
    EXPORT
