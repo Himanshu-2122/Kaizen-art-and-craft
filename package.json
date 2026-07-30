@@ -1,1 +1,23 @@
-{}
+{
+    "name": "kaizen-art-and-craft",
+    "version": "1.0.0",
+    "description": "this repo is about my full fledged website",
+    "main": "index.js",
+    "scripts": {
+        "backend": "npm --prefix backend run dev",
+        "frontend": "npm --prefix frontend run dev",
+        "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Himanshu-2122/Kaizen-art-and-craft.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/Himanshu-2122/Kaizen-art-and-craft/issues"
+    },
+    "homepage": "https://github.com/Himanshu-2122/Kaizen-art-and-craft#readme"
+}

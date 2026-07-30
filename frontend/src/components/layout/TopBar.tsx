@@ -45,8 +45,6 @@ export default function TopBar() {
           <a href="tel:+919828066098" className="hover:text-[#FF6E31] transition-colors whitespace-nowrap">
             📞 +91 98280 66098
           </a>
-          <span className="text-white/30">|</span>
-          <a href="/auth" className="hover:text-[#FF6E31] transition-colors whitespace-nowrap">Login / Sign Up</a>
         </div>
       </div>
     </div>

@@ -32,14 +32,13 @@ interface FilterState {
 
 const CATEGORIES = [
   { label: "All",               value: "" },
-  { label: "Sofas",             value: "sofa" },
-  { label: "Coffee Tables",     value: "coffee-table" },
-  { label: "TV Units",          value: "tv-unit" },
-  { label: "Dining Sets",       value: "dining-set" },
-  { label: "Chest of Drawers",  value: "chest-of-drawers" },
-  { label: "Study Tables",      value: "study-table" },
-  { label: "Wall Temple",       value: "wall-temple" },
+  { label: "Wall Art",          value: "wall-art" },
+  { label: "Pottery",           value: "pottery" },
+  { label: "Textile Crafts",    value: "textile-crafts" },
+  { label: "3 Daraz Racks",     value: "3-daraz" },
+  { label: "6 Daraz Racks",     value: "6-daraz" },
 ];
+
 
 const SORT_OPTIONS = [
   { label: "Newest First",       value: "newest" },

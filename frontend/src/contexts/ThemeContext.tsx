@@ -14,9 +14,13 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem("kaizen-theme") as Theme | null;
-    if (stored) return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    // Force light theme for everyone. Clear any stale "dark" preference
+    // that a returning user may have saved previously.
+    if (localStorage.getItem("kaizen-theme") === "dark") {
+      localStorage.setItem("kaizen-theme", "light");
+    }
+    // Always default to light (warm craft aesthetic), ignoring the OS theme.
+    return "light";
   });
 
   useEffect(() => {

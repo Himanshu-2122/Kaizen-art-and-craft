@@ -342,10 +342,13 @@ export default function ProfilePage() {
                               <div className="flex items-center gap-2 px-5 py-3 bg-[#F5F5F5] border-t border-[#EEEEEE]">
                                 <MapPin size={13} className="text-[#999999] shrink-0" />
                                 <p className="text-xs text-[#555555] truncate">
-                                  {order.shippingAddress}
+                                  {typeof order.shippingAddress === "object"
+                                    ? [order.shippingAddress.street, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.zip].filter(Boolean).join(", ")
+                                    : order.shippingAddress}
                                 </p>
                               </div>
                             )}
+
                           </div>
                         );
                       })

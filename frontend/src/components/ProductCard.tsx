@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import { ShoppingCart, Heart, Star, Eye } from "lucide-react";
 import { getImageUrl } from "@/lib/utils";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,9 +22,10 @@ interface Product {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
-  const { addItem }         = useCart();
-  const { user }            = useAuth();
-  const { refreshWishlist } = useWishlist();
+  const { addItem } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
+  const isWishlisted = isInWishlist(product._id);
 
   const image = product.images?.length
     ? (product.images[0].startsWith("http") ? product.images[0] : getImageUrl(product.images[0]))
@@ -37,6 +38,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const avgRating = product.averageRating ?? 0;
   const reviewCount = product.numReviews ?? 0;
+  const lowStock = typeof product.stock === "number" && product.stock > 0 && product.stock <= 5;
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault();
@@ -45,64 +47,88 @@ export default function ProductCard({ product }: { product: Product }) {
     toast.success("Added to cart");
   }
 
-  async function handleWishlist(e: React.MouseEvent) {
+  async function handleWishlistClick(e: React.MouseEvent) {
     e.preventDefault();
-    if (!user) { toast.error("Please login to add to wishlist"); return; }
-    try {
-      await api.post("/wishlist", { productId: product._id });
-      await refreshWishlist();
-      toast.success("Added to wishlist");
-    } catch {
-      toast.error("Could not update wishlist");
-    }
+    await toggleWishlist(product._id);
   }
 
   return (
     <Link to={`/product/${product.slug}`} className="block group">
-      <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
-
+      <div
+        className="relative bg-white rounded-xl overflow-hidden border border-[#EFEFEF]
+                   shadow-[0_1px_3px_rgba(0,0,0,0.05)]
+                   hover:shadow-[0_16px_40px_rgba(0,0,0,0.12)] hover:border-[#FF6E31]/20
+                   hover:-translate-y-1 transition-all duration-350 ease-out"
+      >
         {/* Image container */}
-        <div className="relative aspect-square bg-[#F8F8F8] overflow-hidden">
+        <div className="relative aspect-square bg-[#FAFAF8] overflow-hidden">
           <img
             src={image}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-[600ms] ease-out"
             loading="lazy"
           />
 
-          {/* Discount badge top-left */}
-          {discount > 0 && (
-            <span className="absolute top-3 left-3 bg-[#FF6E31] text-white text-[10px] font-bold px-2 py-0.5">
-              {discount}% OFF
-            </span>
-          )}
+          {/* Subtle bottom gradient for legibility / polish */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+          {/* Top-left badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+            {discount > 0 && (
+              <span className="bg-[#FF6E31] text-white text-[10px] font-bold tracking-wide px-2.5 py-1 rounded-md shadow-sm">
+                {discount}% OFF
+              </span>
+            )}
+            {lowStock && product.stock !== 0 && (
+              <span className="bg-[#111111] text-white text-[9.5px] font-semibold tracking-wide px-2.5 py-1 rounded-md">
+                Only {product.stock} left
+              </span>
+            )}
+          </div>
 
           {/* Out of stock overlay */}
           {product.stock === 0 && (
-            <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
-              <span className="bg-[#111111] text-white text-xs font-bold px-3 py-1">
+            <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">
+              <span className="bg-[#111111] text-white text-xs font-bold px-4 py-1.5 rounded-md tracking-wide">
                 Out of Stock
               </span>
             </div>
           )}
 
-          {/* Wishlist button top-right — appears on hover */}
-          <button
-            onClick={handleWishlist}
-            className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-1.5 shadow opacity-0 group-hover:opacity-100 transition-all hover:bg-[#FF6E31] group/wish"
-            title="Add to wishlist"
-          >
-            <Heart size={16} className="text-[#FF6E31] group-hover/wish:text-white transition-colors" />
-          </button>
+          {/* Floating action column (wishlist + quick view) */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+            <button
+              onClick={handleWishlistClick}
+              className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md backdrop-blur-md
+                          transition-all duration-300
+                          ${isWishlisted
+                            ? "bg-[#FF6E31] text-white scale-100 opacity-100"
+                            : "bg-white/95 text-[#111111] opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-[#FF6E31] hover:text-white"}`}
+              title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              <Heart size={15} className={isWishlisted ? "fill-white" : ""} />
+            </button>
 
-          {/* Add to cart bar slides up from bottom on hover */}
+            <button
+              className="w-9 h-9 rounded-full flex items-center justify-center bg-white/95 text-[#111111]
+                         shadow-md backdrop-blur-md opacity-0 translate-y-1
+                         group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-[60ms]
+                         hover:bg-[#111111] hover:text-white"
+              title="Quick view"
+              onClick={(e) => e.preventDefault()}
+            >
+              <Eye size={15} />
+            </button>
+          </div>
+
+          {/* Add to cart bar — slides up, brand orange to match site CTAs */}
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="absolute bottom-0 left-0 right-0 bg-[#111111] text-white text-[12px] font-bold
-                       text-center py-2.5 translate-y-full group-hover:translate-y-0 transition-transform
-                       duration-300 flex items-center justify-center gap-2
-                       hover:bg-[#333333] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="absolute bottom-0 left-0 right-0 bg-[#FF6E31] text-white text-[12.5px] font-bold
+                       text-center py-3 translate-y-full group-hover:translate-y-0 transition-transform
+                       duration-300 ease-out flex items-center justify-center gap-2 z-10
+                       hover:bg-[#E55F20] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingCart size={14} />
             {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
@@ -113,44 +139,51 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="p-4">
           {/* Category */}
           {product.category && (
-            <p className="text-[10px] text-[#999999] uppercase tracking-wider mb-1">
+            <p className="text-[10px] text-[#FF6E31]/90 font-semibold uppercase tracking-wider mb-1.5">
               {product.category.replace(/-/g, " ")}
             </p>
           )}
 
           {/* Name */}
-          <h3 className="text-[13.5px] text-[#111111] font-medium line-clamp-2 leading-snug mb-2">
+          <h3 className="font-serif text-[15px] text-[#111111] font-semibold line-clamp-2 leading-snug mb-2 group-hover:text-[#FF6E31] transition-colors duration-200">
             {product.name}
           </h3>
 
           {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
+          <div className="flex items-center gap-1.5 mb-2.5">
             <div className="flex items-center gap-0.5">
               {[1, 2, 3, 4, 5].map((s) => (
                 <Star
                   key={s}
-                  size={11}
-                  className={s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-[#EEEEEE] fill-[#EEEEEE]"}
+                  size={12}
+                  className={s <= Math.round(avgRating) ? "fill-amber-400 text-amber-400" : "text-[#E8E8E8] fill-[#E8E8E8]"}
                 />
               ))}
             </div>
-            {reviewCount > 0 && (
+            {reviewCount > 0 ? (
               <span className="text-[11px] text-[#999999]">({reviewCount})</span>
+            ) : (
+              <span className="text-[11px] text-[#CCCCCC]">No reviews yet</span>
             )}
           </div>
 
+          {/* Divider */}
+          <div className="h-px bg-[#F0F0F0] mb-2.5" />
+
           {/* Price */}
-          <div className="flex items-center gap-2">
-            <span className="text-[16px] font-bold text-[#111111]">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[17px] font-bold text-[#111111]">
               ₹{product.price.toLocaleString("en-IN")}
             </span>
             {product.mrpPrice && product.mrpPrice > product.price && (
-              <span className="text-[12px] text-[#999999] line-through">
+              <span className="text-[12px] text-[#AAAAAA] line-through">
                 ₹{product.mrpPrice.toLocaleString("en-IN")}
               </span>
             )}
             {discount > 0 && (
-              <span className="text-[11px] text-[#FF6E31] font-bold">{discount}% off</span>
+              <span className="ml-auto text-[10.5px] text-[#FF6E31] font-bold bg-[#FF6E31]/10 px-1.5 py-0.5 rounded">
+                Save {discount}%
+              </span>
             )}
           </div>
         </div>
