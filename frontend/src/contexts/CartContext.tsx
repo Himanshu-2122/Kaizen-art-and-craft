@@ -53,7 +53,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             : i
         );
       }
-      return [...prev, { ...item, id: crypto.randomUUID(), quantity: item.quantity || 1 }];
+      const newId =
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      return [...prev, { ...item, id: newId, quantity: item.quantity || 1 }];
     });
   }, []);
 

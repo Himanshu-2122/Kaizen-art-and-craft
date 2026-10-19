@@ -1,34 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const slides = [
   {
-    tag: "Handmade Wall Art",
-    headline: "Handcrafted\nWall Masterpieces",
-    subline: "Authentic Mandala canvas art, hand-carved Sheesham wooden panels, and Warli tribal frames.",
-    ctaPrimary: "Explore Wall Art",
-    ctaSecondary: "All Craft Categories",
-    ctaHref: "/shop?category=wall-art",
-    image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1600&q=80",
-  },
-  {
-    tag: "Jaipur Heritage",
-    headline: "Royal Blue Pottery\n& Ceramics",
-    subline: "Hand-painted Jaipur ceramic vases, glazed dinnerware sets, and eco-friendly terracotta planters.",
-    ctaPrimary: "Explore Pottery",
-    ctaSecondary: "All Craft Categories",
-    ctaHref: "/shop?category=pottery",
-    image: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1600&q=80",
-  },
-  {
-    tag: "Traditional Decor",
-    headline: "Decorative 3 & 6\nDaraz Racks",
-    subline: "Handcrafted wooden 3-shelf and 6-shelf wall racks adorned with traditional Indian motifs.",
-    ctaPrimary: "Shop Wall Racks",
+    tag: "Artisan Wooden Living",
+    headline: "Handcrafted Solid\nWood Masterpieces",
+    subline: "Artisan Sheesham & Teak wood furniture, ergonomic lounge chairs, and carved living room storage.",
+    ctaPrimary: "Explore Furniture",
     ctaSecondary: "All Craft Categories",
     ctaHref: "/shop?category=3-daraz",
-    image: "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?w=1600&q=80",
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600&q=80",
+  },
+  {
+    tag: "Designer Craft",
+    headline: "Timeless Dining &\nCoffee Tables",
+    subline: "Solid oak & elm handcrafted dining sets, carved coffee tables, and contemporary wooden consoles.",
+    ctaPrimary: "Shop Tables & Seating",
+    ctaSecondary: "All Craft Categories",
+    ctaHref: "/shop",
+    image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1600&q=80",
+  },
+  {
+    tag: "Heritage Storage",
+    headline: "Decorative 3 & 6\nDaraz Wooden Racks",
+    subline: "Handcrafted Sheesham & Teak wood multi-shelf wall racks, cabinets, and artisan storage units.",
+    ctaPrimary: "Shop Wooden Racks",
+    ctaSecondary: "All Craft Categories",
+    ctaHref: "/shop?category=3-daraz",
+    image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=1600&q=80",
   },
 ];
 
@@ -36,29 +37,29 @@ export default function HeroBanner() {
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
 
-  useEffect(() => {
-    const t = setInterval(() => go((current + 1) % slides.length), 5000);
-    return () => clearInterval(t);
-  }, [current]);
-
-  function go(idx: number) {
+  const go = useCallback((idx: number) => {
     if (animating || idx === current) return;
     setAnimating(true);
     setCurrent(idx);
     setTimeout(() => setAnimating(false), 600);
-  }
+  }, [animating, current]);
+
+  useEffect(() => {
+    const t = setInterval(() => go((current + 1) % slides.length), 5000);
+    return () => clearInterval(t);
+  }, [current, go]);
 
   const slide = slides[current];
 
   return (
     // Outer section: no background of its own — inherits the page/body background
-    <section className="relative w-full px-4 sm:px-6 md:px-10 lg:px-14 pt-4 md:pt-6">
-      {/* Inner framed box — taller min-height on mobile so content has room to breathe */}
+    <section className="relative w-full px-4 sm:px-6 md:px-10 lg:px-14 pt-3 md:pt-5 pb-2">
+      {/* Inner framed box */}
       <div
-        className="relative w-full mx-auto overflow-hidden rounded-xl"
+        className="relative w-full mx-auto overflow-hidden rounded-[4px] border border-[#dedede] shadow-sm"
         style={{
-          minHeight: 460,
-          maxWidth: "1600px",
+          minHeight: 480,
+          maxWidth: "1400px",
         }}
       >
         {/* Slide images */}
@@ -74,45 +75,43 @@ export default function HeroBanner() {
         ))}
 
         {/* Dark gradient overlay from left */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/15" />
 
         {/* Content */}
-        <div className="relative z-10 h-full flex items-center py-10 sm:py-0" style={{ minHeight: 460 }}>
-          <div className="max-w-[1400px] w-full mx-auto px-5 sm:px-6 md:px-14">
+        <div className="relative z-10 h-full flex items-center py-12 sm:py-0" style={{ minHeight: 480 }}>
+          <div className="max-w-[1400px] w-full mx-auto px-6 sm:px-10 md:px-14">
             <div
               key={current}
               className="max-w-xl"
               style={{ animation: "hero-slide-up 0.6s ease forwards" }}
             >
-              {/* Orange tag label */}
-              <span className="inline-block bg-[#FF6E31] text-white text-[10px] sm:text-[11px] font-bold tracking-widest uppercase px-2.5 sm:px-3 py-1 mb-3 sm:mb-4">
+              {/* Orange tag label: reference #ec7744 badge */}
+              <span className="inline-block bg-[#ec7744] text-white text-[11px] font-bold tracking-widest uppercase px-3 py-1 mb-4 rounded-[2px]">
                 {slide.tag}
               </span>
 
-              {/* Headline — smaller on mobile so it never fights subline/buttons for space */}
-              <h1 className="font-serif text-white text-[1.9rem] sm:text-[2.4rem] md:text-[3.2rem] lg:text-[3.8rem] font-bold leading-[1.15] tracking-tight mb-3 sm:mb-4 whitespace-pre-line">
+              {/* Headline */}
+              <h1 className="text-white text-[2rem] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[3.6rem] font-bold leading-[1.12] tracking-tight mb-4 whitespace-pre-line">
                 {slide.headline}
               </h1>
 
-              {/* Subline — clamped to 2 lines so it can't push into arrow territory */}
-              <p className="text-white/70 text-xs sm:text-sm md:text-base leading-relaxed mb-5 sm:mb-6 max-w-md line-clamp-2">
+              {/* Subline */}
+              <p className="text-white/80 text-sm md:text-base leading-relaxed mb-6 max-w-md line-clamp-2">
                 {slide.subline}
               </p>
 
-              {/* CTA buttons */}
-              <div className="flex flex-wrap gap-3 sm:gap-4">
+              {/* CTA row */}
+              <div className="flex flex-wrap items-center gap-3">
                 <Link
                   to={slide.ctaHref}
-                  className="inline-flex items-center gap-2 bg-[#FF6E31] hover:bg-[#E55F20]
-                             text-white font-bold px-5 sm:px-6 py-2.5 sm:py-3 transition-colors text-xs sm:text-sm"
+                  className="bg-[#ec7744] hover:bg-[#f09269] active:bg-[#8e4729] text-white font-bold text-sm px-7 py-3 rounded-[4px] shadow-sm transition-all flex items-center gap-2"
                 >
                   {slide.ctaPrimary}
+                  <span>→</span>
                 </Link>
                 <Link
                   to="/shop"
-                  className="inline-flex items-center gap-2 border border-white/50
-                             text-white font-medium px-5 sm:px-6 py-2.5 sm:py-3 hover:border-white hover:bg-white/10
-                             transition-colors text-xs sm:text-sm"
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm font-semibold text-sm px-6 py-3 rounded-[4px] transition-all"
                 >
                   {slide.ctaSecondary}
                 </Link>
@@ -121,35 +120,32 @@ export default function HeroBanner() {
           </div>
         </div>
 
-        {/* Left/right arrows — hidden on mobile, content height varies too much there; dots + swipe handle it */}
+        {/* Navigation arrows: reference .rINTw / .uAauI */}
         <button
           onClick={() => go((current - 1 + slides.length) % slides.length)}
-          className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20
-                     w-11 h-11 rounded-full bg-white/15 backdrop-blur-sm hover:bg-white/30 text-white items-center justify-center transition-colors"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[4px] bg-white/80 hover:bg-white text-[#121212] flex items-center justify-center shadow-md transition-all z-20"
           aria-label="Previous slide"
         >
           <ChevronLeft size={20} />
         </button>
         <button
           onClick={() => go((current + 1) % slides.length)}
-          className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20
-                     w-11 h-11 rounded-full bg-white/15 backdrop-blur-sm hover:bg-white/30 text-white items-center justify-center transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[4px] bg-white/80 hover:bg-white text-[#121212] flex items-center justify-center shadow-md transition-all z-20"
           aria-label="Next slide"
         >
           <ChevronRight size={20} />
         </button>
 
-        {/* Dot pagination at bottom-left */}
-        <div className="absolute bottom-4 sm:bottom-6 left-5 sm:left-6 md:left-14 flex gap-2 sm:gap-2.5 z-20">
+        {/* Slide indicators: reference .Mkr8h / .iVvPI */}
+        <div className="absolute bottom-4 right-6 flex items-center gap-2 z-20">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => go(i)}
-              className={`transition-all duration-300 ${
-                i === current
-                  ? "bg-[#FF6E31] w-6 sm:w-7 h-2"
-                  : "bg-white/40 hover:bg-white/70 w-2 h-2"
-              }`}
+              className={cn(
+                "transition-all duration-200 rounded-full",
+                i === current ? "w-6 h-2 bg-[#ec7744]" : "w-2 h-2 bg-white/60 hover:bg-white"
+              )}
               aria-label={`Go to slide ${i + 1}`}
             />
           ))}
@@ -160,12 +156,6 @@ export default function HeroBanner() {
         @keyframes hero-slide-up {
           from { opacity: 0; transform: translateY(20px); }
           to   { opacity: 1; transform: translateY(0); }
-        }
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
         }
       `}</style>
     </section>

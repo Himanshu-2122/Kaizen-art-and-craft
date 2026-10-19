@@ -42,19 +42,19 @@ describe('ProductsTable', () => {
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
 
     await user.type(screen.getByPlaceholderText('Product Name'), 'New Test Product');
-    await user.type(screen.getByPlaceholderText('Category'), 'New Category');
+    await user.selectOptions(screen.getByLabelText('Category *'), 'wall-art');
     await user.type(screen.getByPlaceholderText('Retail Price'), '150');
     await user.type(screen.getByPlaceholderText('MRP Price'), '250');
-    await user.type(screen.getByPlaceholderText('e.g. Sheesham Wood'), 'Test Wood');
-    await user.type(screen.getByPlaceholderText('e.g. Honey Finish'), 'Test Finish');
+    await user.type(screen.getByPlaceholderText('e.g. Canvas, Ceramic, Cotton'), 'Canvas');
+    await user.type(screen.getByPlaceholderText('e.g. Matte, Glazed, Embroidered'), 'Matte');
     await user.type(screen.getByPlaceholderText('Length'), '20');
     await user.type(screen.getByPlaceholderText('Width'), '20');
     await user.type(screen.getByPlaceholderText('Height'), '20');
     await user.type(screen.getByPlaceholderText('Net Weight'), '15');
     await user.type(screen.getByPlaceholderText('e.g. 12'), '24');
-    await user.type(screen.getByPlaceholderText('King, Queen, Single'), 'King');
+    await user.type(screen.getByPlaceholderText('Small, Medium, Large'), 'Standard');
     await user.type(screen.getByPlaceholderText('Product Description...'), 'New Description');
-    await user.selectOptions(screen.getByLabelText('Storage Type *'), 'Box Storage');
+    await user.selectOptions(screen.getByLabelText('Storage Type *'), 'Without Storage');
 
     const fileInput = screen.getByTestId('file-input');
     await user.upload(fileInput, file);

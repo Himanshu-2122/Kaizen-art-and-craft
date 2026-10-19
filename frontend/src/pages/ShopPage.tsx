@@ -1,8 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { SlidersHorizontal, X, Star, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import api from "@/lib/api";
 import ProductCard from "@/components/ProductCard";
+import { useCategories } from "@/hooks/useCategories";
 
 /* ── Types ─────────────────────────────────────────── */
 
@@ -30,7 +31,7 @@ interface FilterState {
 
 /* ── Constants ──────────────────────────────────────── */
 
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   { label: "All",               value: "" },
   { label: "Wall Art",          value: "wall-art" },
   { label: "Pottery",           value: "pottery" },
@@ -172,28 +173,43 @@ export default function ShopPage() {
     setDrawerOpen(false);
   }
 
+  const { data: dbCategories = [] } = useCategories();
+
+  const categoriesList = useMemo(() => {
+    if (!dbCategories || dbCategories.length === 0) {
+      return FALLBACK_CATEGORIES;
+    }
+    const dynamicItems = dbCategories
+      .filter((c) => c.isActive !== false)
+      .map((c) => ({
+        label: c.name,
+        value: c.slug,
+      }));
+    return [{ label: "All", value: "" }, ...dynamicItems];
+  }, [dbCategories]);
+
   const pageTitle = search
     ? `Results for "${search}"`
     : filters.category
-    ? (CATEGORIES.find((c) => c.value === filters.category)?.label ?? "Shop")
+    ? (categoriesList.find((c) => c.value === filters.category)?.label ?? filters.category)
     : "All Products";
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header strip */}
-      <div className="bg-white border-b border-[#EEEEEE] py-5 px-4 sm:px-6">
+      {/* Header strip: reference clean border and typography */}
+      <div className="bg-white border-b border-[#dedede] py-5 px-4 sm:px-6">
         <div className="max-w-[1400px] mx-auto">
-          <nav className="flex items-center gap-2 text-xs text-[#555555] mb-2">
-            <Link to="/" className="hover:text-[#FF6E31] transition-colors">Home</Link>
+          <nav className="flex items-center gap-2 text-xs text-[#7d7d7d] mb-2">
+            <Link to="/" className="hover:text-[#ec7744] transition-colors">Home</Link>
             <span>/</span>
-            <span className="text-[#111111] font-medium">Shop</span>
+            <span className="text-[#121212] font-semibold">{pageTitle}</span>
           </nav>
 
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#111111]">{pageTitle}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#121212]">{pageTitle}</h1>
               {!loading && (
-                <p className="text-sm text-[#555555] mt-1">
+                <p className="text-sm text-[#7d7d7d] mt-1">
                   {total} product{total !== 1 ? "s" : ""} found
                 </p>
               )}
@@ -203,8 +219,8 @@ export default function ShopPage() {
               {search && (
                 <button
                   onClick={() => setParam("search", null)}
-                  className="flex items-center gap-1.5 text-sm text-[#FF6E31] border border-[#FF6E31]
-                             px-3 py-1.5 hover:bg-[#FF6E31] hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-bold text-[#ec7744] border border-[#ec7744] rounded-[4px]
+                             px-3 py-1.5 hover:bg-[#ec7744] hover:text-white transition-colors"
                 >
                   <X size={13} /> Clear search
                 </button>
@@ -212,14 +228,14 @@ export default function ShopPage() {
               <button
                 aria-expanded={drawerOpen}
                 onClick={() => setDrawerOpen(true)}
-                className="lg:hidden relative flex items-center gap-2 bg-white border border-[#EEEEEE]
-                           text-[#111111] px-4 py-2 text-sm font-medium hover:border-[#FF6E31]
-                           hover:text-[#FF6E31] transition-colors"
+                className="lg:hidden relative flex items-center gap-2 bg-white border border-[#dedede] rounded-[4px]
+                           text-[#121212] px-4 py-2 text-xs font-bold hover:border-[#ec7744]
+                           hover:text-[#ec7744] transition-colors"
               >
-                <SlidersHorizontal size={15} />
+                <SlidersHorizontal size={14} />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#FF6E31] text-white
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#ec7744] text-white
                                    text-[10px] font-bold rounded-full flex items-center justify-center">
                     {activeFilterCount}
                   </span>
@@ -254,6 +270,7 @@ export default function ShopPage() {
           >
             <FilterPanel
               filters={filters}
+              categories={categoriesList}
               priceMin={priceMin}
               priceMax={priceMax}
               activeFilterCount={activeFilterCount}
@@ -272,20 +289,23 @@ export default function ShopPage() {
           {/* ── Product grid ───────────────────────────── */}
           <section className="flex-1 min-w-0">
             {/* Sort bar — desktop only */}
-            <div className="hidden lg:flex items-center justify-between mb-6">
-              <p className="text-sm text-[#555555]">
+            <div className="hidden lg:flex items-center justify-between mb-6 pb-3 border-b border-[#dedede]">
+              <p className="text-sm text-[#7d7d7d]">
                 {loading ? "Loading…" : `${total} product${total !== 1 ? "s" : ""} found`}
               </p>
-              <select
-                value={filters.sort}
-                onChange={(e) => setParam("sort", e.target.value === "newest" ? null : e.target.value)}
-                className="text-sm border border-[#EEEEEE] px-3 py-2 text-[#111111] bg-white
-                           focus:outline-none focus:border-[#FF6E31] cursor-pointer"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#7d7d7d] font-medium">Sort by:</span>
+                <select
+                  value={filters.sort}
+                  onChange={(e) => setParam("sort", e.target.value === "newest" ? null : e.target.value)}
+                  className="text-xs font-semibold border border-[#dedede] rounded-[4px] px-3 py-1.5 text-[#121212] bg-white
+                             focus:outline-none focus:border-[#ec7744] cursor-pointer"
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Active filter chips */}
@@ -293,7 +313,7 @@ export default function ShopPage() {
               <div className="flex flex-wrap gap-2 mb-5">
                 {filters.category && (
                   <FilterChip
-                    label={CATEGORIES.find((c) => c.value === filters.category)?.label ?? filters.category}
+                    label={categoriesList.find((c) => c.value === filters.category)?.label ?? filters.category}
                     onRemove={() => setParam("category", null)}
                   />
                 )}
@@ -327,7 +347,7 @@ export default function ShopPage() {
                 )}
                 <button
                   onClick={clearAllFilters}
-                  className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-[#FF6E31] hover:underline"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-[#ec7744] hover:underline"
                 >
                   <RotateCcw size={11} /> Clear all
                 </button>
@@ -338,30 +358,30 @@ export default function ShopPage() {
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {Array.from({ length: 9 }).map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="aspect-square bg-[#F5F5F5] mb-3" />
-                    <div className="h-3 bg-[#F5F5F5] rounded w-1/2 mb-2" />
-                    <div className="h-4 bg-[#F5F5F5] rounded w-3/4 mb-2" />
-                    <div className="h-4 bg-[#F5F5F5] rounded w-1/3" />
+                  <div key={i} className="animate-pulse bg-white p-3 rounded-[4px] border border-[#dedede]">
+                    <div className="aspect-square bg-[#f7f7f7] rounded-[2px] mb-3" />
+                    <div className="h-3 bg-[#f7f7f7] rounded w-1/2 mb-2" />
+                    <div className="h-4 bg-[#f7f7f7] rounded w-3/4 mb-2" />
+                    <div className="h-4 bg-[#f7f7f7] rounded w-1/3" />
                   </div>
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-24">
-                <p className="text-4xl mb-4">🎨</p>
-                <p className="text-lg font-bold text-[#111111] mb-2">No products found</p>
-                <p className="text-sm text-[#555555] mb-6">
+              <div className="text-center py-20 bg-white border border-[#dedede] rounded-[4px]">
+                <p className="text-4xl mb-3">🎨</p>
+                <p className="text-lg font-bold text-[#121212] mb-1">No products found</p>
+                <p className="text-sm text-[#7d7d7d] mb-6">
                   {search ? `No results for "${search}"` : "Try adjusting your filters"}
                 </p>
                 <button
                   onClick={clearAllFilters}
-                  className="bg-[#FF6E31] text-white font-bold px-6 py-2.5 text-sm hover:bg-[#E55F20] transition-colors"
+                  className="bg-[#ec7744] hover:bg-[#f09269] text-white font-bold px-7 py-2.5 text-xs uppercase tracking-wider rounded-[4px] transition-colors shadow-sm"
                 >
                   Clear All Filters
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
                 {products.map((p) => (
                   <ProductCard key={p._id} product={p} />
                 ))}
@@ -376,12 +396,14 @@ export default function ShopPage() {
 
 /* ── Filter Chip ────────────────────────────────────── */
 
+/* ── Filter Chip ────────────────────────────────────── */
+
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-[#FFF4EE] border border-[#FF6E31]/30
-                     text-[#FF6E31] text-xs font-medium px-3 py-1">
+    <span className="inline-flex items-center gap-1.5 bg-[#fbe4da] border border-[#ec7744]/30
+                     text-[#ec7744] text-xs font-semibold px-2.5 py-1 rounded-[2px]">
       {label}
-      <button onClick={onRemove} className="hover:text-[#E55F20] transition-colors">
+      <button onClick={onRemove} className="hover:text-[#8e4729] transition-colors" aria-label="Remove filter">
         <X size={11} />
       </button>
     </span>
@@ -392,6 +414,7 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
 
 interface FilterPanelProps {
   filters: FilterState;
+  categories: { label: string; value: string }[];
   priceMin: string;
   priceMax: string;
   activeFilterCount: number;
@@ -407,7 +430,7 @@ interface FilterPanelProps {
 }
 
 function FilterPanel({
-  filters, priceMin, priceMax, activeFilterCount,
+  filters, categories, priceMin, priceMax, activeFilterCount,
   onSortChange, onCategoryChange, onInStockChange, onMinRatingChange,
   onPriceMinChange, onPriceMaxChange, onApplyPrice, onClearAll, onClose,
 }: FilterPanelProps) {
@@ -416,12 +439,12 @@ function FilterPanel({
   return (
     <div className="p-5 lg:p-0 space-y-4">
       {/* Panel header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-[#111111] flex items-center gap-2">
-          <SlidersHorizontal size={14} className="text-[#FF6E31]" />
+      <div className="flex items-center justify-between pb-3 border-b border-[#dedede]">
+        <h2 className="text-sm font-bold text-[#121212] flex items-center gap-2">
+          <SlidersHorizontal size={14} className="text-[#ec7744]" />
           Filters
           {activeFilterCount > 0 && (
-            <span className="text-[10px] font-bold bg-[#FF6E31] text-white px-1.5 py-0.5">
+            <span className="text-[10px] font-bold bg-[#ec7744] text-white px-1.5 py-0.5 rounded-[2px]">
               {activeFilterCount}
             </span>
           )}
@@ -430,16 +453,17 @@ function FilterPanel({
           {activeFilterCount > 0 && (
             <button
               onClick={onClearAll}
-              className="hidden lg:flex items-center gap-1 text-xs font-medium text-[#FF6E31] hover:underline"
+              className="hidden lg:flex items-center gap-1 text-xs font-bold text-[#ec7744] hover:underline"
             >
               <RotateCcw size={11} /> Clear all
             </button>
           )}
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 hover:bg-[#F5F5F5] transition-colors"
+            className="lg:hidden p-1.5 hover:bg-[#f7f7f7] rounded-[4px] transition-colors"
+            aria-label="Close filters"
           >
-            <X size={17} className="text-[#555555]" />
+            <X size={17} className="text-[#7d7d7d]" />
           </button>
         </div>
       </div>
@@ -455,10 +479,10 @@ function FilterPanel({
                 value={o.value}
                 checked={filters.sort === o.value}
                 onChange={() => onSortChange(o.value)}
-                className="accent-[#FF6E31] w-3.5 h-3.5 flex-shrink-0"
+                className="accent-[#ec7744] w-3.5 h-3.5 flex-shrink-0"
               />
-              <span className={`text-[13px] transition-colors group-hover:text-[#FF6E31] ${
-                filters.sort === o.value ? "font-medium text-[#FF6E31]" : "text-[#555555]"
+              <span className={`text-[13px] transition-colors group-hover:text-[#ec7744] ${
+                filters.sort === o.value ? "font-bold text-[#ec7744]" : "text-[#7d7d7d]"
               }`}>
                 {o.label}
               </span>
@@ -470,14 +494,14 @@ function FilterPanel({
       {/* Category */}
       <FilterSection title="Category">
         <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <button
               key={c.value}
               onClick={() => onCategoryChange(c.value)}
-              className={`px-3 py-1 text-xs font-medium border transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border rounded-[4px] transition-colors ${
                 filters.category === c.value
-                  ? "bg-[#FF6E31] text-white border-[#FF6E31]"
-                  : "border-[#EEEEEE] text-[#555555] bg-white hover:border-[#FF6E31] hover:text-[#FF6E31]"
+                  ? "bg-[#ec7744] text-white border-[#ec7744] font-bold"
+                  : "border-[#dedede] text-[#121212] bg-white hover:border-[#ec7744] hover:text-[#ec7744]"
               }`}
             >
               {c.label}
@@ -491,38 +515,38 @@ function FilterPanel({
         <div className="space-y-3">
           <div className="flex items-end gap-2">
             <div className="flex-1">
-              <label className="text-[10px] font-medium text-[#555555] mb-1 block">Min</label>
+              <label className="text-[11px] font-medium text-[#7d7d7d] mb-1 block">Min</label>
               <input
                 type="number"
                 min={0}
                 value={priceMin}
                 onChange={(e) => onPriceMinChange(e.target.value)}
                 placeholder="0"
-                className="w-full border border-[#EEEEEE] px-2.5 py-2 text-[13px] text-[#111111]
-                           bg-white focus:outline-none focus:border-[#FF6E31]"
+                className="w-full border border-[#dedede] rounded-[4px] px-2.5 py-1.5 text-[13px] text-[#121212]
+                           bg-white focus:outline-none focus:border-[#ec7744]"
               />
             </div>
-            <span className="text-[#555555] mb-2 text-sm">–</span>
+            <span className="text-[#7d7d7d] mb-2 text-sm">–</span>
             <div className="flex-1">
-              <label className="text-[10px] font-medium text-[#555555] mb-1 block">Max</label>
+              <label className="text-[11px] font-medium text-[#7d7d7d] mb-1 block">Max</label>
               <input
                 type="number"
                 min={0}
                 value={priceMax}
                 onChange={(e) => onPriceMaxChange(e.target.value)}
                 placeholder="Any"
-                className="w-full border border-[#EEEEEE] px-2.5 py-2 text-[13px] text-[#111111]
-                           bg-white focus:outline-none focus:border-[#FF6E31]"
+                className="w-full border border-[#dedede] rounded-[4px] px-2.5 py-1.5 text-[13px] text-[#121212]
+                           bg-white focus:outline-none focus:border-[#ec7744]"
               />
             </div>
           </div>
           <button
             onClick={onApplyPrice}
             disabled={!priceChanged && !priceMin && !priceMax}
-            className={`w-full text-xs font-bold py-2 transition-colors ${
+            className={`w-full text-xs font-bold py-2 rounded-[4px] transition-colors ${
               priceChanged
-                ? "bg-[#FF6E31] text-white hover:bg-[#E55F20]"
-                : "bg-[#F5F5F5] text-[#999999] cursor-not-allowed"
+                ? "bg-[#ec7744] text-white hover:bg-[#f09269]"
+                : "bg-[#f7f7f7] text-[#999999] cursor-not-allowed border border-[#dedede]"
             }`}
           >
             Apply Price
@@ -540,10 +564,10 @@ function FilterPanel({
               value=""
               checked={filters.minRating === ""}
               onChange={() => onMinRatingChange("")}
-              className="accent-[#FF6E31] w-3.5 h-3.5 flex-shrink-0"
+              className="accent-[#ec7744] w-3.5 h-3.5 flex-shrink-0"
             />
-            <span className={`text-[13px] transition-colors group-hover:text-[#FF6E31] ${
-              filters.minRating === "" ? "font-medium text-[#FF6E31]" : "text-[#555555]"
+            <span className={`text-[13px] transition-colors group-hover:text-[#ec7744] ${
+              filters.minRating === "" ? "font-bold text-[#ec7744]" : "text-[#7d7d7d]"
             }`}>
               All ratings
             </span>
@@ -556,12 +580,12 @@ function FilterPanel({
                 value={o.value}
                 checked={filters.minRating === o.value}
                 onChange={() => onMinRatingChange(o.value)}
-                className="accent-[#FF6E31] w-3.5 h-3.5 flex-shrink-0"
+                className="accent-[#ec7744] w-3.5 h-3.5 flex-shrink-0"
               />
-              <span className={`text-[13px] transition-colors group-hover:text-[#FF6E31] flex items-center gap-1 ${
-                filters.minRating === o.value ? "font-medium text-[#FF6E31]" : "text-[#555555]"
+              <span className={`text-[13px] transition-colors group-hover:text-[#ec7744] flex items-center gap-1 ${
+                filters.minRating === o.value ? "font-bold text-[#ec7744]" : "text-[#7d7d7d]"
               }`}>
-                <Star size={11} className="fill-amber-400 text-amber-400 flex-shrink-0" />
+                <Star size={12} className="fill-[#ec7744] text-[#ec7744] flex-shrink-0" />
                 {o.label}
               </span>
             </label>
@@ -577,15 +601,15 @@ function FilterPanel({
           onClick={() => onInStockChange(!filters.inStock)}
           className="flex items-center gap-3 w-full text-left"
         >
-          <div className={`relative w-10 h-5 transition-colors flex-shrink-0 ${
-            filters.inStock ? "bg-[#FF6E31]" : "bg-[#EEEEEE]"
+          <div className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${
+            filters.inStock ? "bg-[#ec7744]" : "bg-[#dedede]"
           }`}>
-            <div className={`absolute top-0.5 w-4 h-4 bg-white shadow-sm transition-transform ${
+            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${
               filters.inStock ? "translate-x-5" : "translate-x-0.5"
             }`} />
           </div>
           <span className={`text-[13px] font-medium transition-colors ${
-            filters.inStock ? "text-[#FF6E31]" : "text-[#555555]"
+            filters.inStock ? "font-bold text-[#ec7744]" : "text-[#7d7d7d]"
           }`}>
             In Stock Only
           </span>
@@ -593,19 +617,19 @@ function FilterPanel({
       </FilterSection>
 
       {/* Mobile action buttons */}
-      <div className="flex gap-3 pt-1 lg:hidden pb-2">
+      <div className="flex gap-3 pt-2 lg:hidden pb-2">
         {activeFilterCount > 0 && (
           <button
             onClick={onClearAll}
-            className="flex-1 border border-[#EEEEEE] text-[#555555] text-sm font-medium py-2.5
-                       hover:border-[#FF6E31] hover:text-[#FF6E31] transition-colors"
+            className="flex-1 border border-[#dedede] text-[#121212] text-xs font-bold py-2.5 rounded-[4px]
+                       hover:border-[#ec7744] hover:text-[#ec7744] transition-colors"
           >
             Clear All
           </button>
         )}
         <button
           onClick={onClose}
-          className="flex-1 bg-[#FF6E31] text-white text-sm font-bold py-2.5 hover:bg-[#E55F20] transition-colors"
+          className="flex-1 bg-[#ec7744] text-white text-xs font-bold py-2.5 rounded-[4px] hover:bg-[#f09269] transition-colors shadow-sm"
         >
           Show Results
         </button>
@@ -620,19 +644,19 @@ function FilterSection({ title, children }: { title: string; children: React.Rea
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="bg-white border border-[#EEEEEE] overflow-hidden">
+    <div className="bg-white border border-[#dedede] rounded-[4px] overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 text-left bg-white hover:bg-[#f7f7f7] transition-colors"
       >
-        <span className="text-[11px] font-bold uppercase tracking-wider text-[#111111]">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-[#121212]">
           {title}
         </span>
         {open
-          ? <ChevronUp size={14} className="text-[#555555]" />
-          : <ChevronDown size={14} className="text-[#555555]" />}
+          ? <ChevronUp size={14} className="text-[#7d7d7d]" />
+          : <ChevronDown size={14} className="text-[#7d7d7d]" />}
       </button>
-      {open && <div className="px-4 pb-4">{children}</div>}
+      {open && <div className="px-3.5 pb-3.5 pt-1">{children}</div>}
     </div>
   );
 }

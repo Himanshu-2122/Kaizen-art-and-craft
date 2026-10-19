@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Users, ShieldCheck, User as UserIcon } from "lucide-react";
+import { UserProfile } from "@/types";
 
 export default function UsersTable() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

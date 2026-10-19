@@ -12,5 +12,6 @@ export function getImageUrl(path: string) {
     return path;
   }
   const baseUrl = import.meta.env.VITE_API_URL?.replace("/api/v1", "") || 'http://localhost:5000';
-  return `${baseUrl}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${baseUrl}${normalizedPath}`;
 }

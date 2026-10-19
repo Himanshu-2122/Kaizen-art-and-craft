@@ -55,8 +55,9 @@ export default function AuthPage() {
       await signIn(form.email, form.password);
       toast.success("Welcome back!");
       navigate("/");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Invalid email or password");
+    } catch (err: unknown) {
+      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Invalid email or password";
+      toast.error(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -73,8 +74,8 @@ export default function AuthPage() {
       setSignupStep("verify");
       setCountdown(60);
       setSignupOtpCode("");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to send OTP");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to send OTP");
     } finally {
       setSubmitting(false);
     }
@@ -95,8 +96,8 @@ export default function AuthPage() {
       });
       toast.success("Account created! Welcome to Kaizen!");
       navigate("/");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "OTP verification failed");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "OTP verification failed");
     } finally {
       setSubmitting(false);
     }
@@ -111,8 +112,8 @@ export default function AuthPage() {
       toast.success("OTP resent!");
       setCountdown(60);
       setSignupOtpCode("");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to resend OTP");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to resend OTP");
     } finally {
       setOtpSending(false);
     }
@@ -128,8 +129,8 @@ export default function AuthPage() {
       setOtpLoginStep("verify");
       setCountdown(60);
       setOtpCode("");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to send OTP");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to send OTP");
     } finally {
       setOtpSending(false);
     }
@@ -143,8 +144,8 @@ export default function AuthPage() {
       await verifyLoginOTP(otpPhone.trim(), otpCode);
       toast.success("Welcome back!");
       navigate("/");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "OTP verification failed");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "OTP verification failed");
     } finally {
       setSubmitting(false);
     }
@@ -159,8 +160,8 @@ export default function AuthPage() {
       toast.success("OTP resent!");
       setCountdown(60);
       setOtpCode("");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to resend OTP");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to resend OTP");
     } finally {
       setOtpSending(false);
     }
@@ -207,59 +208,69 @@ export default function AuthPage() {
       {/* ── LEFT — Brand Panel (desktop only) ── */}
       <div
         className="hidden lg:flex lg:w-[44%] relative flex-col justify-between p-14 overflow-hidden"
-        style={{ background: "linear-gradient(145deg, #FF6E31 0%, #E55F20 45%, #111111 100%)" }}
+        style={{ background: "linear-gradient(155deg, #121212 0%, #1c1b1f 60%, #2f180e 100%)" }}
       >
         {/* Dot grid */}
         <div
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
+            backgroundSize: "24px 24px",
           }}
         />
-        {/* Glow orbs */}
-        <div className="absolute -top-20 -right-20 w-72 h-72 opacity-20"
-          style={{ background: "radial-gradient(circle, #ffffff 0%, transparent 70%)" }} />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 opacity-20"
-          style={{ background: "radial-gradient(circle, #ffffff 0%, transparent 70%)" }} />
+        {/* Glow accent */}
+        <div className="absolute -top-20 -right-20 w-80 h-80 opacity-20"
+          style={{ background: "radial-gradient(circle, #ec7744 0%, transparent 70%)" }} />
+        <div className="absolute -bottom-20 -left-20 w-80 h-80 opacity-20"
+          style={{ background: "radial-gradient(circle, #ec7744 0%, transparent 70%)" }} />
 
         {/* Logo */}
         <div className="relative z-10">
-          <Link to="/" className="inline-block bg-white p-2.5">
+          <Link to="/" className="inline-flex items-center gap-3 bg-white p-3 rounded-[4px] shadow-sm">
             <img
               src="/kaizenlogo.png"
-              alt="Kaizen Art & Craft"
-              className="h-24 w-auto object-contain"
+              alt="Kaizen Livings"
+              className="h-12 w-auto object-contain"
               draggable={false}
             />
+            <div className="flex flex-col">
+              <span className="font-serif text-lg font-bold tracking-[0.2em] text-[#121212] leading-none uppercase">
+                Kaizen
+              </span>
+              <span className="text-[10px] tracking-[0.3em] font-medium text-[#ec7744] uppercase leading-tight mt-0.5">
+                Livings
+              </span>
+            </div>
           </Link>
         </div>
 
         {/* Headline + features */}
         <div className="relative z-10 space-y-10">
           <div>
-            <h2 className="text-[2.6rem] font-black text-white leading-[1.15]">
+            <div className="inline-block bg-[#ec7744]/20 border border-[#ec7744]/40 text-[#ec7744] text-xs font-bold px-3 py-1 rounded-[4px] mb-4">
+              ARTISAN FURNITURE & DECOR
+            </div>
+            <h2 className="text-[2.5rem] font-bold text-white leading-[1.18]">
               Craft Your<br />
-              <span className="text-white/80">Perfect</span> Home.
+              <span className="text-[#ec7744]">Timeless</span> Home.
             </h2>
-            <p className="text-white/60 mt-4 text-sm leading-relaxed max-w-xs">
-              Authentic handcrafted art from skilled Indian artisans.
-              Tradition built to last generations.
+            <p className="text-white/70 mt-4 text-sm leading-relaxed max-w-sm">
+              Discover authentic handcrafted wooden furniture and artistic decor from skilled artisans. Built for lifelong comfort.
             </p>
           </div>
 
           <div className="space-y-3.5">
             {[
-              { icon: ShieldCheck, label: "100% Authentic Handcraft" },
-              { icon: Truck,        label: "Free Delivery Across India" },
-              { icon: Sparkles,     label: "Curated Artisan Collections" },
-              { icon: Headphones,   label: "Dedicated Customer Support" },
+              { icon: ShieldCheck, label: "100% Solid Wood & Authentic Handcraft" },
+              { icon: Truck,        label: "Secure Delivery & Assembly Across India" },
+              { icon: Sparkles,     label: "Bespoke & Heritage Furniture Designs" },
+              { icon: Headphones,   label: "Dedicated Customer Care & Guidance" },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-3.5">
-                <div className="w-9 h-9 bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
-                  <Icon size={16} className="text-white" />
+                <div className="w-9 h-9 rounded-[4px] bg-white/10 border border-white/10 flex items-center justify-center shrink-0 text-[#ec7744]">
+                  <Icon size={16} />
                 </div>
-                <span className="text-white/75 text-sm font-medium">{label}</span>
+                <span className="text-white/85 text-sm font-medium">{label}</span>
               </div>
             ))}
           </div>
@@ -267,16 +278,16 @@ export default function AuthPage() {
 
         {/* Testimonial */}
         <div className="relative z-10">
-          <div className="bg-white/10 border border-white/10 p-5">
-            <div className="flex gap-0.5 mb-3">
+          <div className="bg-white/5 border border-white/10 p-5 rounded-[4px] backdrop-blur-sm">
+            <div className="flex gap-1 mb-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <Star key={i} size={13} className="fill-white text-white" />
+                <Star key={i} size={13} className="fill-[#ec7744] text-[#ec7744]" />
               ))}
             </div>
-            <p className="text-white/80 text-sm italic leading-relaxed">
-              "The quality of Kaizen handcraft is exceptional. My living room looks absolutely stunning!"
+            <p className="text-white/85 text-sm italic leading-relaxed">
+              "The solid wood finish and attention to detail on our dining set is phenomenal. It truly elevates our living space."
             </p>
-            <p className="text-white/60 text-xs font-bold mt-3">— Priya S., Mumbai</p>
+            <p className="text-white/60 text-xs font-semibold mt-3">— Priya & Vikram S., Mumbai</p>
           </div>
         </div>
       </div>
@@ -287,27 +298,35 @@ export default function AuthPage() {
 
           {/* Mobile-only logo */}
           <div className="lg:hidden flex justify-center mb-8">
-            <Link to="/" className="inline-block">
+            <Link to="/" className="inline-flex items-center gap-2.5 p-3 bg-[#f8f1eb] rounded-[4px]">
               <img
                 src="/kaizenlogo.png"
-                alt="Kaizen Art & Craft"
-                className="h-20 w-auto object-contain"
+                alt="Kaizen Livings"
+                className="h-10 w-auto object-contain"
                 draggable={false}
               />
+              <div className="flex flex-col text-left">
+                <span className="font-serif text-base font-bold tracking-[0.2em] text-[#121212] leading-none uppercase">
+                  Kaizen
+                </span>
+                <span className="text-[9px] tracking-[0.3em] font-medium text-[#ec7744] uppercase leading-tight mt-0.5">
+                  Livings
+                </span>
+              </div>
             </Link>
           </div>
 
           {/* ── Mode Tabs ── */}
           {!inVerifyStep && (
-            <div className="flex bg-[#F5F5F5] p-1 mb-8 border border-[#EEEEEE]">
+            <div className="flex bg-[#f7f7f7] p-1 mb-8 border border-[#dedede] rounded-[4px]">
               {(["login", "register", "otp"] as Mode[]).map((m) => (
                 <button
                   key={m}
                   onClick={() => switchMode(m)}
-                  className={`flex-1 py-2.5 text-[11px] font-bold tracking-wide uppercase transition-all duration-200 ${
+                  className={`flex-1 py-2.5 text-[11px] font-bold tracking-wider uppercase transition-all duration-200 rounded-[2px] ${
                     mode === m
-                      ? "bg-[#FF6E31] text-white shadow-sm"
-                      : "text-[#555555] hover:bg-[#EEEEEE] hover:text-[#111111]"
+                      ? "bg-[#ec7744] text-white shadow-sm"
+                      : "text-[#7d7d7d] hover:bg-[#dedede]/40 hover:text-[#121212]"
                   }`}
                 >
                   {m === "login" ? "Sign In" : m === "register" ? "Register" : "OTP Login"}
@@ -320,8 +339,8 @@ export default function AuthPage() {
           {mode === "login" && (
             <div>
               <div className="mb-7">
-                <h1 className="text-3xl font-black text-[#111111]">Welcome Back</h1>
-                <p className="text-[#555555] text-sm mt-1">Sign in to continue your shopping</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-[#121212]">Welcome Back</h1>
+                <p className="text-[#7d7d7d] text-sm mt-1">Sign in to continue your shopping</p>
               </div>
 
               <form onSubmit={handleLoginSubmit} className="space-y-4">
@@ -342,7 +361,7 @@ export default function AuthPage() {
                 </div>
 
                 <div className="flex justify-end -mt-1">
-                  <button type="button" className="text-xs text-[#FF6E31] hover:underline font-semibold">
+                  <button type="button" className="text-xs text-[#ec7744] hover:underline font-semibold">
                     Forgot password?
                   </button>
                 </div>
@@ -357,13 +376,13 @@ export default function AuthPage() {
               <div className="space-y-3">
                 <OutlineBtn
                   onClick={() => switchMode("otp")}
-                  icon={<Smartphone size={16} className="text-[#FF6E31]" />}
+                  icon={<Smartphone size={16} className="text-[#ec7744]" />}
                 >
                   Login with OTP instead
                 </OutlineBtn>
                 <OutlineBtn onClick={() => switchMode("register")}>
                   Don't have an account?{" "}
-                  <span className="text-[#FF6E31] font-bold ml-1">Register</span>
+                  <span className="text-[#ec7744] font-bold ml-1">Register</span>
                 </OutlineBtn>
               </div>
             </div>
@@ -373,11 +392,11 @@ export default function AuthPage() {
           {mode === "register" && signupStep === "form" && (
             <div>
               <div className="mb-7">
-                <h1 className="text-3xl font-black text-[#111111]">Create Account</h1>
-                <p className="text-[#555555] text-sm mt-1">
-                  Join Kaizen for exclusive handcraft deals
+                <h1 className="text-2xl md:text-3xl font-bold text-[#121212]">Create Account</h1>
+                <p className="text-[#7d7d7d] text-sm mt-1">
+                  Join Kaizen for handcrafted luxury and member benefits
                 </p>
-                <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-[#FFF4EE] text-xs font-bold text-[#FF6E31] border border-[#FF6E31]/20">
+                <span className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 bg-[#fbe4da] text-xs font-bold text-[#ec7744] border border-[#ec7744]/20 rounded-[4px]">
                   <Sparkles size={12} />
                   10% off on your first order
                 </span>
@@ -410,16 +429,16 @@ export default function AuthPage() {
                       {[1, 2, 3, 4].map((l) => (
                         <div
                           key={l}
-                          className={`h-1.5 flex-1 transition-all duration-300 ${
-                            l <= pwStrength.level ? pwStrength.color : "bg-[#EEEEEE]"
+                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                            l <= pwStrength.level ? pwStrength.color : "bg-[#dedede]"
                           }`}
                         />
                       ))}
                     </div>
                     {pwStrength.label && (
-                      <p className="text-xs text-[#555555]">
+                      <p className="text-xs text-[#7d7d7d]">
                         Strength:{" "}
-                        <span className="font-bold text-[#111111]">{pwStrength.label}</span>
+                        <span className="font-bold text-[#121212]">{pwStrength.label}</span>
                       </p>
                     )}
                   </div>
@@ -432,9 +451,9 @@ export default function AuthPage() {
 
               <p className="text-[11px] text-center text-[#999999] mt-5">
                 By registering, you agree to our{" "}
-                <a href="/terms" className="text-[#FF6E31] hover:underline">Terms</a>
+                <a href="/terms" className="text-[#ec7744] hover:underline">Terms</a>
                 {" "}and{" "}
-                <a href="/privacy" className="text-[#FF6E31] hover:underline">Privacy Policy</a>
+                <a href="/privacy" className="text-[#ec7744] hover:underline">Privacy Policy</a>
               </p>
             </div>
           )}
@@ -463,20 +482,20 @@ export default function AuthPage() {
           {mode === "otp" && otpLoginStep === "phone" && (
             <div>
               <div className="mb-7">
-                <h1 className="text-3xl font-black text-[#111111]">OTP Login</h1>
-                <p className="text-[#555555] text-sm mt-1">Enter your registered phone number</p>
+                <h1 className="text-2xl md:text-3xl font-bold text-[#121212]">OTP Login</h1>
+                <p className="text-[#7d7d7d] text-sm mt-1">Enter your registered phone number</p>
               </div>
 
               <div className="space-y-4">
                 <div className="relative group">
-                  <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999] group-focus-within:text-[#FF6E31] transition-colors" />
+                  <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999] group-focus-within:text-[#ec7744] transition-colors" />
                   <input
                     type="tel"
                     placeholder="Phone number (+91…)"
                     value={otpPhone}
                     onChange={(e) => setOtpPhone(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSendLoginOTP()}
-                    className="w-full bg-white border border-[#EEEEEE] pl-12 pr-4 py-3.5 text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none focus:border-[#FF6E31] focus:ring-1 focus:ring-[#FF6E31] transition-all"
+                    className="w-full bg-white border border-[#dedede] rounded-[4px] pl-12 pr-4 py-3 text-sm text-[#121212] placeholder:text-[#999999] focus:outline-none focus:border-[#ec7744] focus:ring-1 focus:ring-[#ec7744] transition-all"
                   />
                 </div>
 
@@ -484,7 +503,7 @@ export default function AuthPage() {
                   type="button"
                   onClick={handleSendLoginOTP}
                   disabled={otpSending}
-                  className="w-full bg-[#FF6E31] hover:bg-[#E55F20] text-white py-4 font-bold text-sm tracking-wide transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-[#ec7744] hover:bg-[#bd5f37] text-white py-3.5 font-bold text-sm tracking-wide rounded-[4px] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
                 >
                   {otpSending ? (
                     <>
@@ -551,7 +570,7 @@ interface AuthInputProps {
 function AuthInput({ icon: Icon, name, type = "text", placeholder, value, onChange, onFocus, onBlur }: AuthInputProps) {
   return (
     <div className="relative group">
-      <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999] group-focus-within:text-[#FF6E31] transition-colors duration-200" />
+      <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999] group-focus-within:text-[#ec7744] transition-colors duration-200" />
       <input
         name={name}
         type={type}
@@ -561,7 +580,7 @@ function AuthInput({ icon: Icon, name, type = "text", placeholder, value, onChan
         onFocus={onFocus}
         onBlur={onBlur}
         required
-        className="w-full bg-white border border-[#EEEEEE] pl-12 pr-4 py-3.5 text-sm text-[#111111] placeholder:text-[#999999] focus:outline-none focus:border-[#FF6E31] focus:ring-1 focus:ring-[#FF6E31] transition-all duration-200"
+        className="w-full bg-white border border-[#dedede] rounded-[4px] pl-12 pr-4 py-3.5 text-sm text-[#121212] placeholder:text-[#999999] focus:outline-none focus:border-[#ec7744] focus:ring-1 focus:ring-[#ec7744] transition-all duration-200"
       />
     </div>
   );
@@ -572,7 +591,7 @@ function EyeToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) 
     <button
       type="button"
       onClick={onToggle}
-      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#FF6E31] transition-colors"
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#ec7744] transition-colors"
     >
       {show ? <EyeOff size={18} /> : <Eye size={18} />}
     </button>
@@ -592,7 +611,7 @@ function PrimaryBtn({
       type={onClick ? "button" : "submit"}
       onClick={onClick}
       disabled={loading}
-      className="w-full bg-[#FF6E31] hover:bg-[#E55F20] text-white py-4 font-bold text-sm tracking-wide transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      className="w-full bg-[#ec7744] hover:bg-[#bd5f37] text-white py-3.5 font-bold text-sm tracking-wide rounded-[4px] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
     >
       {loading ? (
         <>
@@ -617,7 +636,7 @@ function OutlineBtn({
     <button
       type="button"
       onClick={onClick}
-      className="w-full bg-white border border-[#EEEEEE] py-3.5 text-sm font-semibold text-[#111111] hover:border-[#FF6E31] hover:bg-[#FFF4EE] transition-all duration-200 flex items-center justify-center gap-2"
+      className="w-full bg-white border border-[#dedede] rounded-[4px] py-3 text-sm font-semibold text-[#121212] hover:border-[#ec7744] hover:bg-[#f8f1eb]/50 transition-all duration-200 flex items-center justify-center gap-2"
     >
       {icon}
       {children}
@@ -629,7 +648,7 @@ function Divider() {
   return (
     <div className="relative my-6">
       <div className="absolute inset-0 flex items-center">
-        <div className="w-full border-t border-[#EEEEEE]" />
+        <div className="w-full border-t border-[#dedede]" />
       </div>
       <div className="relative flex justify-center">
         <span className="px-4 bg-white text-[#999999] text-xs font-medium">OR</span>
@@ -670,25 +689,25 @@ function OtpVerifyCard({
     <div className="space-y-7">
 
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-5 bg-[#FFF4EE] border border-[#FF6E31]/20 flex items-center justify-center">
-          <CheckCircle2 size={30} className="text-[#FF6E31]" />
+        <div className="w-16 h-16 mx-auto mb-5 bg-[#fbe4da] border border-[#ec7744]/20 rounded-[4px] flex items-center justify-center">
+          <CheckCircle2 size={30} className="text-[#ec7744]" />
         </div>
-        <h1 className="text-2xl font-black text-[#111111]">{title}</h1>
-        <p className="text-[#555555] text-sm mt-1">
+        <h1 className="text-2xl font-bold text-[#121212]">{title}</h1>
+        <p className="text-[#7d7d7d] text-sm mt-1">
           {subtitle}{" "}
-          <span className="font-bold text-[#111111]">{target}</span>
+          <span className="font-bold text-[#121212]">{target}</span>
         </p>
         <button
           type="button"
           onClick={onChangeTarget}
-          className="text-xs text-[#FF6E31] hover:underline font-semibold mt-1 block mx-auto"
+          className="text-xs text-[#ec7744] hover:underline font-semibold mt-1 block mx-auto"
         >
           {changeLabel}
         </button>
       </div>
 
       <div>
-        <p className="text-xs text-center text-[#999999] mb-4 font-medium">ENTER 6-DIGIT CODE</p>
+        <p className="text-xs text-center text-[#7d7d7d] mb-4 font-semibold tracking-wider">ENTER 6-DIGIT CODE</p>
         <div className="flex justify-center">
           <InputOTP maxLength={6} value={code} onChange={setCode}>
             <InputOTPGroup className="gap-2">
@@ -696,7 +715,7 @@ function OtpVerifyCard({
                 <InputOTPSlot
                   key={i}
                   index={i}
-                  className="w-12 h-14 text-xl font-black border border-[#EEEEEE] bg-white text-[#111111] data-[active=true]:border-[#FF6E31] data-[active=true]:ring-1 data-[active=true]:ring-[#FF6E31] transition-all"
+                  className="w-12 h-14 text-xl font-bold border border-[#dedede] rounded-[4px] bg-white text-[#121212] data-[active=true]:border-[#ec7744] data-[active=true]:ring-1 data-[active=true]:ring-[#ec7744] transition-all"
                 />
               ))}
             </InputOTPGroup>
@@ -706,10 +725,10 @@ function OtpVerifyCard({
 
       <div className="flex items-center justify-center gap-2 text-sm">
         {countdown > 0 ? (
-          <span className="flex items-center gap-1.5 text-[#555555]">
+          <span className="flex items-center gap-1.5 text-[#7d7d7d]">
             <Timer size={15} />
             Resend in{" "}
-            <span className="font-bold text-[#FF6E31] tabular-nums w-7 text-center">
+            <span className="font-bold text-[#ec7744] tabular-nums w-7 text-center">
               {countdown}s
             </span>
           </span>
@@ -718,7 +737,7 @@ function OtpVerifyCard({
             type="button"
             onClick={onResend}
             disabled={resending}
-            className="flex items-center gap-1.5 text-[#FF6E31] hover:underline font-semibold disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[#ec7744] hover:underline font-semibold disabled:opacity-50"
           >
             <RefreshCw size={14} className={resending ? "animate-spin" : ""} />
             Resend OTP
@@ -730,7 +749,7 @@ function OtpVerifyCard({
         type="button"
         onClick={onVerify}
         disabled={verifying || code.length !== 6}
-        className="w-full bg-[#FF6E31] hover:bg-[#E55F20] text-white py-4 font-bold text-sm tracking-wide transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-[#ec7744] hover:bg-[#bd5f37] text-white py-3.5 font-bold text-sm tracking-wide rounded-[4px] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
       >
         {verifying ? (
           <>
@@ -748,7 +767,7 @@ function OtpVerifyCard({
       <button
         type="button"
         onClick={onBack}
-        className="w-full flex items-center justify-center gap-2 text-sm text-[#555555] hover:text-[#FF6E31] transition-colors font-medium"
+        className="w-full flex items-center justify-center gap-2 text-sm text-[#7d7d7d] hover:text-[#ec7744] transition-colors font-medium"
       >
         <ArrowLeft size={14} />
         Go back

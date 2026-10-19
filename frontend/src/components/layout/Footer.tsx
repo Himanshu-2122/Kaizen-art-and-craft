@@ -43,58 +43,66 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-[#2C2C2C] text-white">
+    <footer className="bg-[#121212] text-white border-t border-[#dedede]/10">
       {/* Main footer content */}
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="max-w-[1400px] mx-auto px-6 py-14">
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-10">
 
           {/* Col 1: Brand + contact + social */}
           <div>
-            <Link to="/" className="inline-block mb-5 bg-white p-2">
+            <Link to="/" className="inline-flex items-center gap-3 mb-6 bg-white/10 border border-white/10 p-3 rounded-[4px] hover:border-[#ec7744]/40 transition-colors">
               <img
                 src="/kaizenlogo.png"
-                alt="Kaizen Art & Craft"
-                className="h-24 w-auto object-contain"
+                alt="Kaizen Livings"
+                className="h-12 w-auto object-contain rounded-[2px]"
                 draggable={false}
               />
+              <div className="flex flex-col">
+                <span className="font-serif text-lg font-bold tracking-[0.2em] text-white leading-none uppercase">
+                  Kaizen
+                </span>
+                <span className="text-[10px] tracking-[0.3em] font-medium text-[#ec7744] uppercase leading-tight mt-0.5">
+                  Livings
+                </span>
+              </div>
             </Link>
-            <p className="text-white/50 text-[13px] leading-relaxed mb-6 max-w-[220px]">
-              Authentic Indian handcraft — celebrating artisans and their timeless traditions.
+            <p className="text-white/60 text-[13px] leading-relaxed mb-6 max-w-[240px]">
+              Timeless solid wood furniture and authentic Indian artisan handicrafts designed to elevate modern living.
             </p>
 
             <div className="space-y-3">
-              <a href="tel:+919828066098"
-                 className="flex items-center gap-3 text-[13px] text-white/50 hover:text-[#FF6E31] transition-colors">
-                <Phone size={14} className="shrink-0" />
-                +91 98280 66098
+              <a href="tel:+918090926023"
+                 className="flex items-center gap-3 text-[13px] text-white/60 hover:text-[#ec7744] transition-colors">
+                <Phone size={14} className="shrink-0 text-[#ec7744]" />
+                +91 80909 26023
               </a>
-              <a href="mailto:hi.himanshu21@gmail.com"
-                 className="flex items-center gap-3 text-[13px] text-white/50 hover:text-[#FF6E31] transition-colors">
-                <Mail size={14} className="shrink-0" />
-                hi.himanshu21@gmail.com
+              <a href="mailto:hi.kaizenartandcraft2025@gmail.com"
+                 className="flex items-center gap-3 text-[13px] text-white/60 hover:text-[#ec7744] transition-colors">
+                <Mail size={14} className="shrink-0 text-[#ec7744]" />
+                kaizenartandcraft2025@gmail.com
               </a>
-              <div className="flex items-start gap-3 text-[13px] text-white/50">
-                <MapPin size={14} className="shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 text-[13px] text-white/60">
+                <MapPin size={14} className="shrink-0 mt-0.5 text-[#ec7744]" />
                 Jodhpur, Rajasthan, India
               </div>
             </div>
 
             {/* Social icons */}
-            <div className="flex items-center gap-2.5 mt-6">
+            <div className="flex items-center gap-2 mt-6">
               {[
-                { label: "F", title: "Facebook" },
-                { label: "I", title: "Instagram" },
-                { label: "Y", title: "YouTube" },
-                { label: "P", title: "Pinterest" },
-              ].map(({ label, title }) => (
+                { label: "Facebook", icon: "FB" },
+                { label: "Instagram", icon: "IG" },
+                { label: "YouTube", icon: "YT" },
+                { label: "Pinterest", icon: "PIN" },
+              ].map(({ label, icon }) => (
                 <a
-                  key={title}
+                  key={label}
                   href="#"
-                  aria-label={title}
-                  className="w-8 h-8 rounded-full bg-[#FF6E31] flex items-center justify-center
-                             text-white text-[11px] font-bold hover:bg-[#E55F20] transition-colors"
+                  aria-label={label}
+                  className="w-8 h-8 rounded-[4px] bg-white/10 hover:bg-[#ec7744] flex items-center justify-center
+                             text-white text-[10px] font-bold transition-colors"
                 >
-                  {label}
+                  {icon}
                 </a>
               ))}
             </div>
@@ -103,13 +111,13 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([col, links]) => (
             <div key={col}>
-              <h4 className="font-bold text-white text-[12px] mb-5 uppercase tracking-wider">{col}</h4>
+              <h4 className="font-bold text-white text-[13px] mb-5 uppercase tracking-wider">{col}</h4>
               <ul className="space-y-3">
                 {links.map((l) => (
                   <li key={l.label}>
                     <Link
                       to={l.href}
-                      className="text-[13px] text-white/50 hover:text-white transition-colors"
+                      className="text-[13px] text-white/60 hover:text-[#ec7744] transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -121,33 +129,35 @@ export default function Footer() {
         </div>
 
         {/* Newsletter strip */}
-        <div className="mt-10 pt-8 border-t border-[#444444]">
+        <div className="mt-12 pt-8 border-t border-white/10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             <div>
-              <h3 className="font-bold text-white text-sm mb-1">Stay Updated</h3>
-              <p className="text-white/40 text-[12px]">
-                Get new arrivals, artisan stories and exclusive offers in your inbox.
+              <h3 className="font-bold text-white text-base mb-1">Stay Inspired with Kaizen</h3>
+              <p className="text-white/60 text-xs">
+                Subscribe for newly released artisan woodwork, collections, and exclusive private offers.
               </p>
             </div>
             <div>
               {sent ? (
-                <p className="text-[#FF6E31] font-bold text-sm">Subscribed! Thank you.</p>
+                <div className="p-3 bg-[#fbe4da]/20 border border-[#ec7744]/40 rounded-[4px]">
+                  <p className="text-[#ec7744] font-bold text-sm">Thank you for subscribing to Kaizen updates!</p>
+                </div>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex gap-2">
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your email address"
+                    placeholder="Enter your email address"
                     required
-                    className="flex-1 bg-white/5 border border-white/10 px-4 py-2.5
+                    className="flex-1 bg-white/5 border border-white/15 px-4 py-2.5 rounded-[4px]
                                text-sm text-white placeholder:text-white/30 outline-none
-                               focus:border-[#FF6E31] transition-colors"
+                               focus:border-[#ec7744] transition-colors"
                   />
                   <button
                     type="submit"
-                    className="bg-[#FF6E31] hover:bg-[#E55F20] text-white font-bold
-                               px-5 py-2.5 transition-colors text-sm whitespace-nowrap"
+                    className="bg-[#ec7744] hover:bg-[#bd5f37] text-white font-medium
+                               px-6 py-2.5 rounded-[4px] transition-colors text-sm whitespace-nowrap shadow-sm"
                   >
                     Subscribe
                   </button>
@@ -159,11 +169,11 @@ export default function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-[#444444]">
-        <div className="max-w-[1400px] mx-auto px-6 py-4
-                        flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-white/30">
-            © {new Date().getFullYear()} Kaizen Art & Craft. All rights reserved.
+      <div className="border-t border-white/10 bg-[#0d0d0d]">
+        <div className="max-w-[1400px] mx-auto px-6 py-5
+                        flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-white/50">
+            © {new Date().getFullYear()} Kaizen Art & Craft. All rights reserved. Handcrafted in India.
           </p>
 
           {/* Payment methods */}
@@ -171,7 +181,7 @@ export default function Footer() {
             {paymentMethods.map((pay) => (
               <span
                 key={pay}
-                className="border border-white/15 px-2 py-0.5 text-[10px] font-bold text-white/30"
+                className="border border-white/15 px-2.5 py-0.5 rounded-[2px] text-[10px] font-semibold text-white/60 bg-white/5"
               >
                 {pay}
               </span>
@@ -179,11 +189,11 @@ export default function Footer() {
           </div>
 
           <div className="flex gap-5">
-            {["Privacy Policy", "Terms", "Shipping"].map((p) => (
+            {["Privacy Policy", "Terms of Service", "Shipping & Delivery"].map((p) => (
               <a
                 key={p}
                 href="#"
-                className="text-[11px] text-white/30 hover:text-white/60 transition-colors"
+                className="text-xs text-white/50 hover:text-white transition-colors"
               >
                 {p}
               </a>

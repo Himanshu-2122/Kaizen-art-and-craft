@@ -33,18 +33,18 @@ export default function AboutPage() {
       {/* ── Hero ── */}
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1582585758449-75c99c5c4e2c?w=1920&q=80"
-          alt="Indian artisan crafting wall art"
+          src="https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=1920&q=80"
+          alt="Artisan crafting solid wood furniture"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative z-10 text-center text-white max-w-2xl px-6">
-          <span className="inline-block bg-[#FF6E31] text-white text-[10px] font-bold tracking-[3px] uppercase px-3 py-1 mb-4">
+          <span className="inline-block bg-[#ec7744] text-white text-[10px] font-bold tracking-[3px] uppercase px-3 py-1 mb-4 rounded-[2px]">
             Our Story
           </span>
-          <h1 className="font-serif text-5xl font-bold mb-4">About Kaizen Art & Craft</h1>
-          <p className="text-white/80 text-lg">
-            Celebrating India's rich handcraft heritage — one artisan piece at a time.
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">About Kaizen Art & Craft</h1>
+          <p className="text-white/80 text-base md:text-lg">
+            Mastering solid wood furniture craftsmanship — built to last generations.
           </p>
         </div>
       </section>
@@ -53,40 +53,36 @@ export default function AboutPage() {
       <section className="max-w-[1400px] mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 gap-14 items-center">
           <div>
-            <span className="text-[11px] font-bold tracking-[3px] text-[#FF6E31] uppercase block mb-3">Who We Are</span>
-            <h2 className="font-serif text-4xl text-[#111111] mb-6 leading-snug">
-              Bringing India's Craft Heritage to Your Home
+            <span className="text-[11px] font-bold tracking-[3px] text-[#ec7744] uppercase block mb-3">Who We Are</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#121212] mb-6 leading-snug">
+              Handcrafting Solid Wood Furniture for Modern Homes
             </h2>
-            <p className="text-[15px] text-[#555555] leading-[1.9] mb-4">
-              Kaizen Art & Craft is a curated marketplace of authentic Indian handcraft products. We
-              source directly from artisans across Rajasthan, Punjab, Bengal, and Odisha — ensuring
-              fair wages and preserving traditional art forms.
+            <p className="text-[15px] text-[#7d7d7d] leading-[1.9] mb-4">
+              Kaizen Art & Craft is an artisan workshop and design house specialized in solid Sheesham, Teak, and Mango wood furniture. We blend traditional Indian hand-joinery and jali carving with contemporary, functional storage aesthetics.
             </p>
-            <p className="text-[15px] text-[#555555] leading-[1.9]">
-              Our three core categories — Wall Art, Pottery, and Textile Crafts — represent the breadth
-              and beauty of India's living craft traditions. Each piece tells a story of skill, culture,
-              and generations of artistry.
+            <p className="text-[15px] text-[#7d7d7d] leading-[1.9]">
+              Every 3-daraz, 6-daraz rack, coffee table, and dining piece is cured, hand-sanded, and polished with non-toxic heritage finishes by seasoned wood artisans in Jodhpur and Saharanpur.
             </p>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#EEEEEE]">
+            <div className="grid grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#dedede]">
               {[
-                { value: "100%", label: "Handmade" },
-                { value: "5",    label: "Craft Traditions" },
-                { value: "12+",  label: "Unique Products" },
+                { value: "100%", label: "Solid Wood" },
+                { value: "Heritage", label: "Hand Joinery" },
+                { value: "Pan-India", label: "Free Delivery" },
               ].map(({ value, label }) => (
                 <div key={label} className="text-center">
-                  <div className="text-2xl font-bold text-[#FF6E31]">{value}</div>
-                  <div className="text-xs text-[#555555] font-medium mt-0.5">{label}</div>
+                  <div className="text-2xl font-bold text-[#ec7744]">{value}</div>
+                  <div className="text-xs text-[#7d7d7d] font-medium mt-0.5">{label}</div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="overflow-hidden">
+          <div className="overflow-hidden rounded-[4px] border border-[#dedede]">
             <img
-              src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=700&q=80"
-              alt="Blue pottery artisan at work"
+              src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80"
+              alt="Artisan solid wood furniture display"
               className="w-full h-full object-cover"
             />
           </div>

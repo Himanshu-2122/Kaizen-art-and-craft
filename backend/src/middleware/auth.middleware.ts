@@ -17,8 +17,9 @@ export const protect = (req: any, res: Response, next: NextFunction) => {
 };
 
 export const isAdmin = (req: any, res: Response, next: NextFunction) => {
-  if (req.user.role !== "admin")
-    return res.sendStatus(403);
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ message: "Admin access required" });
+  }
 
   next();
 };

@@ -15,8 +15,8 @@ export default function ContactPage() {
       await api.post("/contact", form);
       toast.success("Message sent successfully!");
       setForm({ name: "", email: "", message: "" });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to send message");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to send message");
     } finally {
       setLoading(false);
     }

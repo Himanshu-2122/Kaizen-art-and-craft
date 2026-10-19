@@ -31,19 +31,22 @@ export default function NewArrivals() {
   });
 
   return (
-    <section className="py-16 bg-white border-t border-[#EEEEEE]">
+    <section className="py-14 bg-[#f8f1eb]/30 border-b border-[#dedede]">
       <div className="max-w-[1400px] mx-auto px-6">
         {/* Header */}
-        <div className="flex items-end justify-between mb-10">
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <span className="text-[11px] font-bold tracking-[3px] text-[#FF6E31] uppercase block mb-2">Just In</span>
-            <h2 className="text-[26px] font-bold tracking-tight text-[#111111]">New Arrivals</h2>
-            <p className="text-[#555555] text-sm mt-1">Fresh handcrafted pieces just added</p>
+            <span className="text-[11px] font-bold tracking-[2px] text-[#ec7744] uppercase block mb-1.5">
+              Just In
+            </span>
+            <h2 className="text-[26px] md:text-[30px] font-bold tracking-tight text-[#121212]">
+              New Arrivals
+            </h2>
+            <p className="text-[#7d7d7d] text-sm mt-1">Fresh handcrafted pieces freshly added</p>
           </div>
           <Link
             to="/shop"
-            className="hidden md:inline-flex items-center gap-1 text-sm font-medium
-                       text-[#FF6E31] hover:underline"
+            className="hidden md:inline-flex items-center gap-1 text-[13px] font-bold text-[#ec7744] hover:underline"
           >
             View All →
           </Link>
@@ -53,20 +56,20 @@ export default function NewArrivals() {
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-square bg-[#F0F0F0] mb-3" />
-                <div className="h-3 bg-[#F0F0F0] rounded w-1/2 mb-2" />
-                <div className="h-4 bg-[#F0F0F0] rounded w-3/4 mb-2" />
-                <div className="h-4 bg-[#F0F0F0] rounded w-1/3" />
+              <div key={i} className="animate-pulse bg-white p-3 rounded-[4px] border border-[#dedede]">
+                <div className="aspect-square bg-[#f7f7f7] rounded-[2px] mb-3" />
+                <div className="h-3 bg-[#f7f7f7] rounded w-1/2 mb-2" />
+                <div className="h-4 bg-[#f7f7f7] rounded w-3/4 mb-2" />
+                <div className="h-4 bg-[#f7f7f7] rounded w-1/3" />
               </div>
             ))}
           </div>
         ) : !products || products.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-[#555555]">No products available yet — check back soon!</p>
+          <div className="text-center py-16 bg-white border border-[#dedede] rounded-[4px]">
+            <p className="text-[#7d7d7d]">No products available yet — check back soon!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
             {products.slice(0, 8).map((p) => (
               <ProductCard key={p._id} product={p} />
             ))}
@@ -76,9 +79,7 @@ export default function NewArrivals() {
         <div className="text-center mt-10">
           <Link
             to="/shop"
-            className="inline-flex items-center gap-2 bg-[#111111] text-white
-                       font-bold text-sm px-10 py-3.5 hover:bg-[#333333]
-                       transition-colors"
+            className="inline-flex items-center gap-2 bg-[#ec7744] hover:bg-[#f09269] active:bg-[#8e4729] text-white font-bold text-sm px-10 py-3 rounded-[4px] shadow-sm transition-all"
           >
             Explore All Products →
           </Link>

@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Suspense } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -20,8 +20,10 @@ import ProfilePage from "./pages/ProfilePage";
 //import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 import { AdminLayout, AdminPage } from "@/pages/admin";
+import DevDesignSystem from "./pages/DevDesignSystem";
 import OrdersTable from "@/pages/admin/components/OrdersTable";
 import ProductsTable from "@/pages/admin/components/ProductsTable";
+import CategoriesTable from "@/pages/admin/components/CategoriesTable";
 import UsersTable from "@/pages/admin/components/UsersTable";
 import AdminGuard from "@/components/AdminGuard";
 import "./styles/GlobalAnimations.css";
@@ -61,9 +63,13 @@ const App = () => (
                   <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
                     <Route index element={<AdminPage />} />
                     <Route path="products" element={<ProductsTable />} />
+                    <Route path="categories" element={<CategoriesTable />} />
                     <Route path="orders" element={<OrdersTable />} />
                     <Route path="users" element={<UsersTable />} />
                   </Route>
+                  {import.meta.env.DEV && (
+                    <Route path="/dev/design-system" element={<DevDesignSystem />} />
+                  )}
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

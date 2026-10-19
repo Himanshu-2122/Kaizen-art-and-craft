@@ -1,3 +1,10 @@
+export const ANNOUNCEMENT_OFFERS = [
+  { id: "free-shipping", text: "Free shipping on orders over ₹499", type: "success" },
+  { id: "handmade", text: "Handmade in India – support artisans", type: "info" },
+  { id: "easy-returns", text: "Easy 30-day returns", type: "success" },
+  { id: "secure-payments", text: "Secure payments with UPI, Card, Netbanking", type: "info" },
+];
+
 export const SITE_NAME = "Kaizen Art and Craft";
 export const SITE_TAGLINE = "Modern Furniture, Timeless Design";
 

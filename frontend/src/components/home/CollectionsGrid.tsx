@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useCategories } from "@/hooks/useCategories";
+import { useMemo } from "react";
+import { getImageUrl } from "@/lib/utils";
 
-const categories = [
+const FALLBACK_CATEGORIES = [
   {
     name: "New Arrivals",
     href: "/shop",
@@ -8,37 +11,37 @@ const categories = [
     isNew: true,
   },
   {
-    name: "Wall Art",
-    href: "/shop?category=wall-art",
+    name: "Living Room",
+    href: "/shop?category=3-daraz",
     image:
-      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=500&q=80",
-  },
-  {
-    name: "Pottery",
-    href: "/shop?category=pottery",
-    image:
-      "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=500&q=80",
-  },
-  {
-    name: "Textile Crafts",
-    href: "/shop?category=textile-crafts",
-    image:
-      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=500&q=80",
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=80",
   },
   {
     name: "3 Daraz Racks",
     href: "/shop?category=3-daraz",
     image:
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=500&q=80",
+      "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=500&q=80",
   },
   {
-    name: "6 Daraz Racks",
+    name: "6 Daraz Cabinets",
     href: "/shop?category=6-daraz",
     image:
       "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=500&q=80",
   },
   {
-    name: "All Collections",
+    name: "Solid Wood Tables",
+    href: "/shop",
+    image:
+      "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=500&q=80",
+  },
+  {
+    name: "Chairs & Seating",
+    href: "/shop",
+    image:
+      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=500&q=80",
+  },
+  {
+    name: "All Furniture",
     href: "/collections",
     image:
       "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=500&q=80",
@@ -46,89 +49,87 @@ const categories = [
 ];
 
 export default function CollectionsGrid() {
+  const { data: dbCategories = [] } = useCategories();
+
+  const categories = useMemo(() => {
+    if (dbCategories && dbCategories.length > 0) {
+      const active = dbCategories.filter((c) => c.isActive !== false);
+      const items = active.slice(0, 6).map((c) => ({
+        name: c.name,
+        href: `/shop?category=${c.slug}`,
+        image: c.imageUrl || c.image || "https://picsum.photos/seed/" + c.slug + "/400/400",
+        isNew: false,
+      }));
+      return [
+        { name: "New Arrivals", href: "/shop", image: null, isNew: true },
+        ...items,
+      ];
+    }
+    return FALLBACK_CATEGORIES;
+  }, [dbCategories]);
   return (
-    <section className="py-14 bg-white border-t border-[#EFEFEF]">
+    <section className="py-14 bg-white border-b border-[#dedede]">
       <div className="max-w-[1400px] mx-auto px-6">
         {/* Heading */}
-        <div className="flex items-end justify-between mb-9">
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <span className="inline-block text-[11px] font-bold tracking-widest uppercase text-[#FF6E31] mb-2">
+            <span className="inline-block text-[11px] font-bold tracking-widest uppercase text-[#ec7744] mb-2">
               Curated Collections
             </span>
 
-            <h2 className="font-serif text-[28px] md:text-[32px] font-bold text-[#212121] leading-tight">
+            <h2 className="text-[26px] md:text-[30px] font-bold text-[#121212] leading-tight">
               Shop by Category
             </h2>
           </div>
 
           <Link
             to="/collections"
-            className="hidden md:inline-block text-[13px] font-semibold text-[#111111] border-b border-[#111111]/30 hover:border-[#FF6E31] hover:text-[#FF6E31] transition-colors duration-200 pb-0.5"
+            className="hidden md:inline-block text-[13px] font-semibold text-[#121212] border-b border-[#121212]/30 hover:border-[#ec7744] hover:text-[#ec7744] transition-colors pb-0.5"
           >
             View All →
           </Link>
         </div>
 
         {/* Categories */}
-        <div className="grid grid-cols-4 lg:grid-cols-8 gap-x-2 md:gap-x-3 gap-y-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
           {categories.map((cat) => (
             <Link
               key={cat.name}
               to={cat.href}
-              className="group flex flex-col items-center gap-3.5"
+              className="group flex flex-col items-center gap-3 p-3 bg-white border border-[#dedede] rounded-[4px] hover:border-[#ec7744] hover:shadow-[0_2px_16px_-4px_rgba(0,0,0,0.08)] transition-all text-center"
             >
               <div
                 className="
                   relative
                   w-full
                   aspect-square
-                  rounded-full
+                  rounded-[4px]
                   overflow-hidden
-                  bg-[#F3F2F0]
-                  ring-1 ring-black/5
-                  shadow-[0_4px_14px_rgba(0,0,0,0.06)]
-                  group-hover:ring-2
-                  group-hover:ring-[#FF6E31]/50
-                  group-hover:shadow-[0_12px_30px_rgba(0,0,0,0.14)]
-                  transition-all
-                  duration-300
+                  bg-[#f7f7f7]
                   flex
                   items-center
                   justify-center
                 "
               >
                 {cat.isNew ? (
-                  <div className="w-full h-full bg-[#1A1A1A] flex items-center justify-center">
-                    <div
-                      className="w-[64%] aspect-square flex items-center justify-center"
-                      style={{
-                        background: "#FF6E31",
-                        clipPath:
-                          "polygon(50% 0%,54% 18%,65% 6%,61% 24%,74% 15%,66% 31%,82% 28%,70% 40%,88% 42%,73% 50%,88% 58%,70% 60%,82% 72%,66% 69%,74% 85%,61% 76%,65% 94%,54% 82%,50% 100%,46% 82%,35% 94%,39% 76%,26% 85%,34% 69%,18% 72%,30% 60%,12% 58%,27% 50%,12% 42%,30% 40%,18% 28%,34% 31%,26% 15%,39% 24%,35% 6%,46% 18%)",
-                      }}
-                    >
-                      <span className="text-white font-black text-[14px]">
-                        NEW
-                      </span>
-                    </div>
+                  <div className="w-full h-full bg-[#f8f1eb] flex flex-col items-center justify-center p-2 text-center">
+                    <span className="text-[12px] font-bold text-[#ec7744] uppercase tracking-wider">
+                      ✨ NEW
+                    </span>
+                    <span className="text-[11px] text-[#7d7d7d] mt-1 font-medium">Arrivals</span>
                   </div>
                 ) : (
                   <img
-                    src={cat.image!}
+                    src={getImageUrl(cat.image || "")}
                     alt={cat.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
-                    onError={(e) => {
-                      e.currentTarget.src =
-                        "https://picsum.photos/seed/home-decor/500/500";
-                    }}
                   />
                 )}
               </div>
-
-              <p className="text-[13px] font-semibold text-[#333333] text-center leading-snug group-hover:text-[#FF6E31] transition-colors duration-200">
+              <span className="text-[13px] font-semibold text-[#121212] group-hover:text-[#ec7744] transition-colors line-clamp-1">
                 {cat.name}
-              </p>
+              </span>
             </Link>
           ))}
         </div>

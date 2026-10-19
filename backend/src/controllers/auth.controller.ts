@@ -113,9 +113,16 @@ export const login = async (req: Request, res: Response) => {
 
 
 export const refresh = (req: Request, res: Response) => {
-  const token = req.cookies.refreshToken;
+  const cookieHeader = req.headers.cookie;
+  const parsedFromHeader = cookieHeader
+    ?.split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith("refreshToken="))
+    ?.split("=")[1];
 
-  if (!token) return res.sendStatus(401);
+  const token = req.cookies?.refreshToken || parsedFromHeader;
+
+  if (!token) return res.status(401).json({ message: "No refresh token provided" });
 
   jwt.verify(
     token,

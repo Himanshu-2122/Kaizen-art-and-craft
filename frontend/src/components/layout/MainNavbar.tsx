@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Heart, ShoppingCart, User, Search, ChevronDown,
@@ -9,135 +9,76 @@ import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
 import api from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
+import { MegaMenu, MegaMenuItem } from "@/components/layout/MegaMenu";
+import { MiniCart } from "@/components/layout/MiniCart";
+import { useCategories } from "@/hooks/useCategories";
 
-const navItems = [
-  { label: "Home", href: "/" },
-  { label: "New Arrivals", href: "/shop" },
+const DEFAULT_CATEGORY_MENUS: Record<string, { label: string; href: string }[]> = {
+  "wall-art": [
+    { label: "Mandala Art",    href: "/shop?category=wall-art&search=mandala" },
+    { label: "Wooden Carved",  href: "/shop?category=wall-art&search=wooden" },
+    { label: "Warli Frames",   href: "/shop?category=wall-art&search=warli" },
+    { label: "Macrame Decor",  href: "/shop?category=wall-art&search=macrame" },
+  ],
+  "pottery": [
+    { label: "Blue Pottery Vases", href: "/shop?category=pottery&search=blue+pottery" },
+    { label: "Terracotta Planters", href: "/shop?category=pottery&search=terracotta" },
+    { label: "Handpainted Sets",   href: "/shop?category=pottery&search=dinner" },
+    { label: "Clay Diyas",         href: "/shop?category=pottery&search=diya" },
+  ],
+  "textile-crafts": [
+    { label: "Block Print Runners", href: "/shop?category=textile-crafts&search=block+print" },
+    { label: "Phulkari Cushions",   href: "/shop?category=textile-crafts&search=phulkari" },
+    { label: "Kantha Throws",       href: "/shop?category=textile-crafts&search=kantha" },
+    { label: "Ikat Tote Bags",      href: "/shop?category=textile-crafts&search=ikat" },
+  ],
+  "3-daraz": [
+    { label: "Sheesham 3 Daraz",    href: "/shop?category=3-daraz&search=sheesham" },
+    { label: "Rajasthani Painted",  href: "/shop?category=3-daraz&search=rajasthani" },
+    { label: "Carved Jali Rack",    href: "/shop?category=3-daraz&search=jali" },
+    { label: "Minimal Shelf",       href: "/shop?category=3-daraz&search=minimal" },
+  ],
+  "6-daraz": [
+    { label: "Sheesham 6 Daraz",    href: "/shop?category=6-daraz&search=sheesham" },
+    { label: "Rajasthani 6 Daraz",  href: "/shop?category=6-daraz&search=rajasthani" },
+    { label: "Royal Carved Rack",   href: "/shop?category=6-daraz&search=royal" },
+    { label: "Modern Display Rack", href: "/shop?category=6-daraz&search=modern" },
+  ],
+};
+
+const FALLBACK_NAV_CATEGORIES: MegaMenuItem[] = [
   {
     label: "Wall Art",
     href: "/shop?category=wall-art",
-    children: [
-      { label: "Mandala Art",    href: "/shop?category=wall-art&search=mandala" },
-      { label: "Wooden Carved",  href: "/shop?category=wall-art&search=wooden" },
-      { label: "Warli Frames",   href: "/shop?category=wall-art&search=warli" },
-      { label: "Macrame Decor",  href: "/shop?category=wall-art&search=macrame" },
-    ],
+    children: DEFAULT_CATEGORY_MENUS["wall-art"],
   },
   {
     label: "Pottery",
     href: "/shop?category=pottery",
-    children: [
-      { label: "Blue Pottery Vases", href: "/shop?category=pottery&search=blue+pottery" },
-      { label: "Terracotta Planters", href: "/shop?category=pottery&search=terracotta" },
-      { label: "Handpainted Sets",   href: "/shop?category=pottery&search=dinner" },
-      { label: "Clay Diyas",         href: "/shop?category=pottery&search=diya" },
-    ],
+    children: DEFAULT_CATEGORY_MENUS["pottery"],
   },
   {
     label: "Textile Crafts",
     href: "/shop?category=textile-crafts",
-    children: [
-      { label: "Block Print Runners", href: "/shop?category=textile-crafts&search=block+print" },
-      { label: "Phulkari Cushions",   href: "/shop?category=textile-crafts&search=phulkari" },
-      { label: "Kantha Throws",       href: "/shop?category=textile-crafts&search=kantha" },
-      { label: "Ikat Tote Bags",      href: "/shop?category=textile-crafts&search=ikat" },
-    ],
+    children: DEFAULT_CATEGORY_MENUS["textile-crafts"],
   },
   {
     label: "3 Daraz Racks",
     href: "/shop?category=3-daraz",
-    children: [
-      { label: "Sheesham 3 Daraz",    href: "/shop?category=3-daraz&search=sheesham" },
-      { label: "Rajasthani Painted",  href: "/shop?category=3-daraz&search=rajasthani" },
-      { label: "Carved Jali Rack",    href: "/shop?category=3-daraz&search=jali" },
-      { label: "Minimal Shelf",       href: "/shop?category=3-daraz&search=minimal" },
-    ],
+    children: DEFAULT_CATEGORY_MENUS["3-daraz"],
   },
   {
     label: "6 Daraz Racks",
     href: "/shop?category=6-daraz",
-    children: [
-      { label: "Sheesham 6 Daraz",    href: "/shop?category=6-daraz&search=sheesham" },
-      { label: "Rajasthani 6 Daraz",  href: "/shop?category=6-daraz&search=rajasthani" },
-      { label: "Royal Carved Rack",   href: "/shop?category=6-daraz&search=royal" },
-      { label: "Modern Display Rack", href: "/shop?category=6-daraz&search=modern" },
-    ],
+    children: DEFAULT_CATEGORY_MENUS["6-daraz"],
   },
-  { label: "Collections", href: "/collections" },
-  { label: "Shop All", href: "/shop" },
-  { label: "About Us", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 
 type NavChild = { label: string; href: string };
 type NavItem  = { label: string; href: string; children?: NavChild[] };
 
-function NavDropdown({ item }: { item: NavItem }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
-  }, []);
-
-  if (!item.children) {
-    return (
-      <Link
-        to={item.href}
-        className="px-3 py-3 text-[13px] font-medium text-[#212121] hover:text-[#FF6E31]
-                   relative group transition-colors whitespace-nowrap"
-      >
-        {item.label}
-        <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-[#FF6E31]
-                         scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-      </Link>
-    );
-  }
-
-  return (
-    <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <Link
-        to={item.href}
-        className="flex items-center gap-0.5 px-3 py-3 text-[13px] font-medium text-[#212121]
-                   hover:text-[#FF6E31] transition-colors whitespace-nowrap group relative"
-      >
-        {item.label}
-        <ChevronDown size={12} className={`transition-transform ${open ? "rotate-180" : ""}`} />
-        <span className="absolute bottom-0 left-3 right-3 h-[2px] bg-[#FF6E31]
-                         scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-      </Link>
-
-      {open && (
-        <div className="absolute top-full left-0 min-w-[210px] bg-white shadow-xl
-                        border-t-2 border-[#FF6E31] z-50 py-1">
-          {item.children.map((child) => (
-            <Link
-              key={child.href}
-              to={child.href}
-              className="block px-5 py-2.5 text-[12.5px] text-[#666666]
-                         hover:bg-[#F5F5F5] hover:text-[#FF6E31]
-                         border-b border-[#E8E8E8] last:border-0 transition-colors"
-            >
-              {child.label}
-            </Link>
-          ))}
-          <Link
-            to={item.href}
-            className="block px-5 py-2.5 text-[12px] font-bold text-[#FF6E31]
-                       hover:bg-[#F5F5F5] transition-colors"
-          >
-            View All →
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-}
 
 interface Suggestion {
   _id: string;
@@ -214,24 +155,24 @@ function SearchBox({ onClose }: { onClose?: () => void }) {
     <div ref={containerRef} className="relative flex-1 max-w-[580px]">
       <form
         onSubmit={handleSubmit}
-        className="flex border border-[#E8E8E8] rounded-lg overflow-hidden
-                   focus-within:border-[#FF6E31] focus-within:ring-1 focus-within:ring-[#FF6E31] transition-all bg-white"
+        className="flex border border-[#dedede] rounded-[4px] overflow-hidden
+                   focus-within:border-[#ec7744] focus-within:ring-1 focus-within:ring-[#ec7744] transition-all bg-white"
       >
-        <div className="flex items-center pl-4 text-[#999999]">
+        <div className="flex items-center pl-3.5 text-[#7d7d7d]">
           <Search size={16} />
         </div>
         <input
           value={search}
           onChange={handleChange}
           onFocus={() => search.trim().length >= 2 && setOpen(true)}
-          placeholder="Search for handcrafted products..."
+          placeholder="Search handcrafted products, wall art, pottery..."
           autoComplete="off"
-          className="flex-1 px-3 py-2.5 text-sm outline-none bg-transparent
-                     text-[#212121] placeholder:text-[#999999]"
+          className="flex-1 px-3 py-2 text-sm outline-none bg-transparent
+                     text-[#121212] placeholder:text-[#999999]"
         />
         <button
           type="submit"
-          className="bg-[#FF6E31] hover:bg-[#E55F20] text-white px-5 text-xs font-bold
+          className="bg-[#ec7744] hover:bg-[#f09269] active:bg-[#8e4729] text-white px-5 text-xs font-bold
                      transition-colors flex items-center gap-1.5"
         >
           {loading ? <Loader2 size={14} className="animate-spin" /> : "SEARCH"}
@@ -240,21 +181,21 @@ function SearchBox({ onClose }: { onClose?: () => void }) {
 
       {open && (
         <div className="absolute left-0 right-0 top-[calc(100%+4px)] bg-white
-                        shadow-2xl border border-[#E8E8E8] z-[200] overflow-hidden">
+                        shadow-lg border border-[#dedede] rounded-[4px] z-[200] overflow-hidden">
           {loading && (
-            <div className="flex items-center gap-3 px-5 py-4 text-sm text-[#666666]">
-              <Loader2 size={15} className="animate-spin text-[#FF6E31]" />
+            <div className="flex items-center gap-3 px-5 py-4 text-sm text-[#7d7d7d]">
+              <Loader2 size={15} className="animate-spin text-[#ec7744]" />
               Searching for "{search}"…
             </div>
           )}
           {!loading && noResults && (
             <div className="px-5 py-6 text-center">
-              <Search size={28} className="mx-auto text-[#E8E8E8] mb-2" />
-              <p className="text-sm text-[#666666]">No results for <strong>"{search}"</strong></p>
+              <Search size={28} className="mx-auto text-[#dedede] mb-2" />
+              <p className="text-sm text-[#7d7d7d]">No results for <strong>"{search}"</strong></p>
               <button
                 onClick={viewAll}
-                className="mt-3 text-xs bg-[#FF6E31]/10 text-[#FF6E31] font-semibold
-                           px-4 py-1.5 hover:bg-[#FF6E31]/20 transition-colors"
+                className="mt-3 text-xs bg-[#fbe4da] text-[#ec7744] font-semibold
+                           px-4 py-1.5 rounded-[4px] hover:bg-[#ec7744] hover:text-white transition-colors"
               >
                 Browse all products
               </button>
@@ -262,8 +203,8 @@ function SearchBox({ onClose }: { onClose?: () => void }) {
           )}
           {!loading && suggestions.length > 0 && (
             <>
-              <div className="px-4 py-2 border-b border-[#E8E8E8] flex items-center gap-1.5">
-                <TrendingUp size={12} className="text-[#FF6E31]" />
+              <div className="px-4 py-2 border-b border-[hsl(var(--border))] flex items-center gap-1.5">
+                <TrendingUp size={12} className="text-[hsl(var(--primary))]" />
                 <span className="text-[11px] font-bold text-[#999999] uppercase tracking-wider">
                   Results for "{search}"
                 </span>
@@ -274,10 +215,10 @@ function SearchBox({ onClose }: { onClose?: () => void }) {
                     <button
                       onClick={() => pickSuggestion(p.slug)}
                       className="w-full flex items-center gap-3 px-4 py-2.5
-                                 hover:bg-[#F5F5F5] transition-colors text-left
-                                 border-b border-[#E8E8E8] last:border-0"
+                                 hover:bg-[hsl(var(--card))] transition-colors text-left
+                                 border-b border-[hsl(var(--border))] last:border-0"
                     >
-                      <div className="w-9 h-9 overflow-hidden bg-[#F5F5F5] shrink-0">
+                      <div className="w-9 h-9 overflow-hidden bg-[hsl(var(--card))] shrink-0">
                         {p.images?.length > 0 ? (
                           <img src={getImageUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover" />
                         ) : (
@@ -287,10 +228,10 @@ function SearchBox({ onClose }: { onClose?: () => void }) {
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium text-[#212121] truncate">{p.name}</p>
+                        <p className="text-[13px] font-medium text-[hsl(var(--foreground))] truncate">{p.name}</p>
                         <p className="text-xs text-[#999999] capitalize">{p.category}</p>
                       </div>
-                      <span className="text-sm font-bold text-[#FF6E31] shrink-0">
+                      <span className="text-sm font-bold text-[hsl(var(--primary))] shrink-0">
                         ₹{p.price.toLocaleString("en-IN")}
                       </span>
                     </button>
@@ -299,8 +240,8 @@ function SearchBox({ onClose }: { onClose?: () => void }) {
               </ul>
               <button
                 onClick={viewAll}
-                className="w-full py-3 text-center text-[12px] font-bold text-[#FF6E31]
-                           hover:bg-[#F5F5F5] transition-colors border-t border-[#E8E8E8]"
+                className="w-full py-3 text-center text-[12px] font-bold text-[hsl(var(--primary))]
+                           hover:bg-[hsl(var(--card))] transition-colors border-t border-[hsl(var(--border))]"
               >
                 View all results for "{search}" →
               </button>
@@ -317,6 +258,35 @@ export default function MainNavbar() {
   const { items, itemCount } = useCart();
   const { wishlistCount }    = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
+
+  const { data: categories = [] } = useCategories();
+
+  const navItems = useMemo<MegaMenuItem[]>(() => {
+    let catItems: MegaMenuItem[] = [];
+
+    if (categories && categories.length > 0) {
+      catItems = categories
+        .filter((c) => c.isActive !== false)
+        .map((c) => ({
+          label: c.name,
+          href: `/shop?category=${c.slug}`,
+          children: DEFAULT_CATEGORY_MENUS[c.slug] || undefined,
+        }));
+    } else {
+      catItems = FALLBACK_NAV_CATEGORIES;
+    }
+
+    return [
+      { label: "Home", href: "/" },
+      { label: "New Arrivals", href: "/shop" },
+      ...catItems,
+      { label: "Collections", href: "/collections" },
+      { label: "Shop All", href: "/shop" },
+      { label: "About Us", href: "/about" },
+      { label: "Contact", href: "/contact" },
+    ];
+  }, [categories]);
 
   const cartCount = itemCount ?? 0;
   const cartTotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -324,16 +294,24 @@ export default function MainNavbar() {
   return (
     <header className="bg-white sticky top-0 z-50">
       {/* ── ROW 2: Logo / Search / Icons ── */}
-      <div className="border-b border-[#E8E8E8]">
+      <div className="border-b border-[hsl(var(--border))]">
         <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center gap-6">
-          {/* Logo — negative margin compensates for PNG's built-in whitespace */}
-          <Link to="/" className="shrink-0 flex items-center -my-3">
+          {/* Logo */}
+          <Link to="/" className="shrink-0 flex items-center gap-2.5">
             <img
               src="/kaizenlogo.png"
-              alt="Kaizen Art & Craft"
-              className="h-24 w-auto object-contain"
+              alt="Kaizen Livings"
+              className="h-12 md:h-14 w-auto object-contain"
               draggable={false}
             />
+            <div className="flex flex-col">
+              <span className="font-serif text-lg md:text-xl font-bold tracking-[0.2em] text-[#121212] leading-none uppercase">
+                Kaizen
+              </span>
+              <span className="text-[9px] md:text-[10px] tracking-[0.3em] font-medium text-[#ec7744] uppercase leading-tight mt-0.5">
+                Livings
+              </span>
+            </div>
           </Link>
 
           {/* Search */}
@@ -342,15 +320,15 @@ export default function MainNavbar() {
           </div>
 
           {/* Action icons */}
-          <div className="flex items-center gap-4 shrink-0 ml-auto">
+<div className="flex items-center gap-4 shrink-0 ml-auto">
             {/* Wishlist */}
-            <Link to="/wishlist" className="flex flex-col items-center gap-0.5 text-[10px] font-medium
-                                            text-[#666666] hover:text-[#FF6E31] transition-colors group">
+            <Link to="/wishlist" className="flex flex-col items-center gap-0.5 text-[11px] font-medium
+                                            text-[#7d7d7d] hover:text-[#ec7744] transition-colors group">
               <div className="relative">
-                <Heart size={20} className="group-hover:scale-110 transition-transform" />
+                <Heart size={20} className="group-hover:scale-105 transition-transform" />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#FF6E31] text-white text-[9px]
-                                   w-[15px] h-[15px] rounded-full flex items-center justify-center font-bold">
+                  <span className="absolute -top-1.5 -right-2 bg-[#ec7744] text-white text-[9px]
+                                   w-[15px] h-[15px] rounded-full flex items-center justify-center font-bold shadow-sm">
                     {wishlistCount}
                   </span>
                 )}
@@ -359,25 +337,36 @@ export default function MainNavbar() {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="flex flex-col items-center gap-0.5 text-[10px] font-medium
-                                        text-[#666666] hover:text-[#FF6E31] transition-colors group">
-              <div className="relative">
-                <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#FF6E31] text-white text-[9px]
-                                   w-[15px] h-[15px] rounded-full flex items-center justify-center font-bold">
-                    {cartCount}
-                  </span>
-                )}
-              </div>
-              <span>₹{cartTotal.toLocaleString("en-IN")}</span>
-            </Link>
+            <div className="relative">
+              <button
+                onClick={() => setMiniCartOpen(!miniCartOpen)}
+                className="flex flex-col items-center gap-0.5 text-[11px] font-medium
+                            text-[#7d7d7d] hover:text-[#ec7744] transition-colors group"
+                aria-label="Cart"
+              >
+                <div className="relative">
+                  <ShoppingCart size={20} className="group-hover:scale-105 transition-transform" />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2 bg-[#ec7744] text-white text-[9px]
+                                     w-[15px] h-[15px] rounded-full flex items-center justify-center font-bold shadow-sm">
+                      {cartCount}
+                    </span>
+                  )}
+                </div>
+                <span>Cart</span>
+              </button>
+
+              <MiniCart
+                open={miniCartOpen}
+                setOpen={setMiniCartOpen}
+              />
+            </div>
 
             {/* Profile */}
             <Link to={user ? "/profile" : "/auth"}
-                  className="hidden sm:flex flex-col items-center gap-0.5 text-[10px] font-medium
-                             text-[#666666] hover:text-[#FF6E31] transition-colors group">
-              <User size={20} className="group-hover:scale-110 transition-transform" />
+                  className="hidden sm:flex flex-col items-center gap-0.5 text-[11px] font-medium
+                             text-[#7d7d7d] hover:text-[#ec7744] transition-colors group">
+              <User size={20} className="group-hover:scale-105 transition-transform" />
               <span>{user ? user.fullName.split(" ")[0] : "Login"}</span>
             </Link>
 
@@ -385,14 +374,14 @@ export default function MainNavbar() {
             {isAdmin && (
               <Link to="/admin"
                     className="hidden sm:flex flex-col items-center gap-0.5 text-[10px] font-bold
-                               text-white bg-[#FF6E31] hover:bg-[#E55F20] px-2.5 py-1 transition-colors group">
-                <LayoutDashboard size={16} className="group-hover:scale-110 transition-transform" />
+                               text-white bg-[#121212] hover:bg-[#ec7744] rounded-[4px] px-2.5 py-1 transition-colors group">
+                <LayoutDashboard size={14} className="group-hover:scale-105 transition-transform" />
                 <span>Admin</span>
               </Link>
             )}
 
             {/* Mobile hamburger */}
-            <button className="md:hidden text-[#212121]" onClick={() => setMobileOpen(!mobileOpen)}>
+            <button className="md:hidden text-[#121212] p-1" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
@@ -400,24 +389,37 @@ export default function MainNavbar() {
       </div>
 
       {/* ── ROW 3: Category Nav ── */}
-      <nav className="border-b border-[#E8E8E8] hidden md:flex max-w-[1400px] mx-auto px-4 overflow-x-auto">
-        {(navItems as NavItem[]).map((item) => (
-          <NavDropdown key={item.label} item={item} />
-        ))}
+      <nav className="border-b border-[#dedede] hidden md:flex max-w-[1400px] mx-auto px-4 overflow-x-auto bg-white">
+        {navItems.map((item) => {
+          if (item.children && item.children.length > 0) {
+            return (
+              <MegaMenu key={item.label} items={item} />
+            );
+          }
+          return (
+            <Link
+              key={item.label}
+              to={item.href}
+              className="px-3.5 py-2.5 text-[13px] font-medium text-[#121212] hover:text-[#ec7744] hover:bg-[#f8f1eb] rounded-[2px] transition-colors whitespace-nowrap"
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </nav>
 
       {/* ── MOBILE MENU ── */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-[#E8E8E8] bg-white max-h-[70vh] overflow-y-auto">
+        <div className="md:hidden border-t border-[hsl(var(--border))] bg-white max-h-[70vh] overflow-y-auto">
           {/* Mobile search */}
-          <div className="px-4 py-3 border-b border-[#E8E8E8]">
+          <div className="px-4 py-3 border-b border-[hsl(var(--border))]">
             <SearchBox onClose={() => setMobileOpen(false)} />
           </div>
 
           {isAdmin && (
             <Link to="/admin" onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-3 px-5 py-3.5 text-sm font-bold
-                             text-white bg-[#FF6E31] hover:bg-[#E55F20] transition-colors">
+                             text-white bg-[hsl(var(--primary))] hover:bg-[hsl(15, 55%, 35%)] transition-colors">
               <LayoutDashboard size={16} /> Admin Panel
             </Link>
           )}
@@ -425,14 +427,14 @@ export default function MainNavbar() {
           {navItems.map((item) => (
             <div key={item.label}>
               <Link to={item.href} onClick={() => setMobileOpen(false)}
-                    className="block px-5 py-3 text-sm font-medium text-[#212121]
-                               border-b border-[#E8E8E8] hover:text-[#FF6E31] hover:bg-[#F5F5F5]">
+                    className="block px-5 py-3 text-sm font-medium text-[hsl(var(--foreground))]
+                               border-b border-[hsl(var(--border))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--card))]">
                 {item.label}
               </Link>
               {item.children?.map((child) => (
                 <Link key={child.href} to={child.href} onClick={() => setMobileOpen(false)}
-                      className="block px-10 py-2 text-xs text-[#666666]
-                                 border-b border-[#E8E8E8] hover:text-[#FF6E31] hover:bg-[#F5F5F5]">
+                      className="block px-10 py-2 text-xs text-[hsl(var(--muted-foreground))]
+                                 border-b border-[hsl(var(--border))] hover:text-[hsl(var(--primary))] hover:bg-[hsl(var(--card))]">
                   {child.label}
                 </Link>
               ))}

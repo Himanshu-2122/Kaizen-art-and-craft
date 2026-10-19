@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import api from "@/lib/api";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
   const [wishlistCount, setWishlistCount] = useState(0);
   const [wishlistItems, setWishlistItems] = useState<string[]>([]);
 
-  const refreshWishlist = async () => {
+  const refreshWishlist = useCallback(async () => {
     if (!user) {
       setWishlistCount(0);
       setWishlistItems([]);
@@ -30,18 +30,20 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
       const list = res.data ?? [];
       setWishlistCount(list.length);
       setWishlistItems(
-        list.map((item: any) =>
-          typeof item.productId === "object" ? item.productId._id : item.productId
-        )
+        list
+          .map((item: { productId?: string | { _id?: string } }) =>
+            typeof item?.productId === "object" ? item.productId?._id : item?.productId
+          )
+          .filter((id): id is string => Boolean(id))
       );
-    } catch (err) {
+    } catch {
       console.error("Wishlist fetch failed");
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     refreshWishlist();
-  }, [user]);
+  }, [refreshWishlist]);
 
   const isInWishlist = (productId: string) => {
     return wishlistItems.includes(productId);

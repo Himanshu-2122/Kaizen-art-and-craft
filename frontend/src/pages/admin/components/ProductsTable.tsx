@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { X, Upload, ImageIcon } from "lucide-react";
 
+import { useCategories } from "@/hooks/useCategories";
+
 const STORAGE_TYPES = ["Without Storage", "Ready to Hang", "Freestanding", "Packaged"];
-const PRODUCT_CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   { label: "Wall Art",        value: "wall-art" },
   { label: "Pottery",         value: "pottery" },
   { label: "Textile Crafts",  value: "textile-crafts" },
@@ -41,14 +43,23 @@ const EMPTY_FORM = {
 const fieldClass = "border border-[#E8E8E8] p-3 w-full text-sm text-[#212121] bg-white focus:outline-none focus:border-[#FF6E31] transition-colors placeholder:text-[#999999]";
 const labelClass = "text-xs font-bold text-[#666666] uppercase tracking-wide mb-1 block";
 
+import { Product, CollectionItem } from "@/types";
+
+type ProductFormState = typeof EMPTY_FORM;
+
 export default function ProductsTable({ onChange }: { onChange?: () => void }) {
-  const [products, setProducts] = useState<any[]>([]);
-  const [form, setForm] = useState<any>(EMPTY_FORM);
+  const { data: dbCategories = [] } = useCategories();
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const categoryOptions = dbCategories.length > 0
+    ? dbCategories.map(c => ({ label: c.name, value: c.slug, id: c._id }))
+    : FALLBACK_CATEGORIES.map(c => ({ ...c, id: "" }));
+  const [form, setForm] = useState<ProductFormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>([]);
-  const [collections, setCollections] = useState<any[]>([]);
+  const [collections, setCollections] = useState<CollectionItem[]>([]);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,7 +74,9 @@ export default function ProductsTable({ onChange }: { onChange?: () => void }) {
     try {
       const res = await api.get("/categories");
       setCollections(Array.isArray(res.data) ? res.data : []);
-    } catch {}
+    } catch (err) {
+      console.error("Failed to load collections:", err);
+    }
   };
 
   useEffect(() => {
@@ -198,32 +211,32 @@ export default function ProductsTable({ onChange }: { onChange?: () => void }) {
       resetForm();
       load();
       onChange?.();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to save product");
+    } catch (err: unknown) {
+      toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to save product");
     } finally {
       setSaving(false);
     }
   };
 
   /* ── EDIT ── */
-  const edit = (p: any) => {
+  const edit = (p: Product) => {
     setForm({
       name: p.name || "",
       description: p.description || "",
-      price: p.price || "",
-      mrpPrice: p.mrpPrice || "",
-      stock: p.stock || "",
+      price: p.price != null ? String(p.price) : "",
+      mrpPrice: p.mrpPrice != null ? String(p.mrpPrice) : "",
+      stock: p.stock != null ? String(p.stock) : "",
       category: p.category || "",
-      collectionId: p.collectionId?._id || p.collectionId || "",
+      collectionId: typeof p.collectionId === "object" ? p.collectionId?._id || "" : p.collectionId || "",
       storageType: p.storageType || "",
       sizes: (p.sizes || []).join(", "),
       materialType: p.materialType || "",
       finishType: p.finishType || "",
-      dimensionLength: p.dimensions?.length || "",
-      dimensionWidth: p.dimensions?.width || "",
-      dimensionHeight: p.dimensions?.height || "",
-      netWeight: p.netWeight || "",
-      warrantyMonths: p.warrantyMonths || "",
+      dimensionLength: p.dimensions?.length != null ? String(p.dimensions.length) : "",
+      dimensionWidth: p.dimensions?.width != null ? String(p.dimensions.width) : "",
+      dimensionHeight: p.dimensions?.height != null ? String(p.dimensions.height) : "",
+      netWeight: p.netWeight != null ? String(p.netWeight) : "",
+      warrantyMonths: p.warrantyMonths != null ? String(p.warrantyMonths) : "",
       serviceablePinCodes: (p.serviceablePinCodes || []).join(", "),
       checkAvailability: p.checkAvailability ?? true,
       bestSeller: p.bestSeller ?? false,
@@ -261,10 +274,24 @@ export default function ProductsTable({ onChange }: { onChange?: () => void }) {
             <input name="name" value={form.name} onChange={handleChange} placeholder="Product Name" className={fieldClass} />
           </div>
           <div>
-            <label className={labelClass}>Category *</label>
-            <select name="category" value={form.category} onChange={handleChange} className={fieldClass}>
+            <label htmlFor="category" className={labelClass}>Category *</label>
+            <select
+              id="category"
+              name="category"
+              value={form.category}
+              onChange={(e) => {
+                const selectedVal = e.target.value;
+                const matchedCat = categoryOptions.find(c => c.value === selectedVal);
+                setForm(prev => ({
+                  ...prev,
+                  category: selectedVal,
+                  collectionId: (!prev.collectionId && matchedCat?.id) ? matchedCat.id : prev.collectionId,
+                }));
+              }}
+              className={fieldClass}
+            >
               <option value="">Select Category</option>
-              {PRODUCT_CATEGORIES.map(c => (
+              {categoryOptions.map(c => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
@@ -276,7 +303,7 @@ export default function ProductsTable({ onChange }: { onChange?: () => void }) {
             <label className={labelClass}>Collection</label>
             <select name="collectionId" value={form.collectionId} onChange={handleChange} className={fieldClass}>
               <option value="">Select Collection</option>
-              {collections.map((c: any) => (
+              {collections.map((c: CollectionItem) => (
                 <option key={c._id} value={c._id}>{c.name}</option>
               ))}
             </select>

@@ -12,10 +12,10 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     proxy: {
-      '/api/v1/uploads': {
-        target: 'http://localhost:5000', // Assuming backend runs on port 5000
+      '/api/v1': {
+        target: 'http://localhost:5000',
         changeOrigin: true,
-        rewrite: (path) => path, // No rewrite needed, path is already /api/v1/uploads
+        rewrite: (path) => path,
       },
     },
   },

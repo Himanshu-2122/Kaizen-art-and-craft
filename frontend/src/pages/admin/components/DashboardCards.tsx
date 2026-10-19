@@ -1,4 +1,11 @@
-export default function DashboardCards({ stats }: any) {
+interface AdminStats {
+  products: number;
+  orders: number;
+  users: number;
+  revenue: number;
+}
+
+export default function DashboardCards({ stats }: { stats: AdminStats }) {
   return (
     <div className="grid md:grid-cols-4 gap-6">
       <Card title="Products" value={stats.products} />

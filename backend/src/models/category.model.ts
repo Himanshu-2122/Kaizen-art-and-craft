@@ -5,7 +5,8 @@ const collectionSchema = new mongoose.Schema(
     name: { type: String, required: true },
     slug: { type: String, unique: true, required: true },
     description: String,
-    imageUrl: String
+    imageUrl: String,
+    isActive: { type: Boolean, default: true }
   },
   { timestamps: true }
 );

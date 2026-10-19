@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -10,15 +11,33 @@ export default {
       padding: "2rem",
       screens: {
         "2xl": "1400px",
+        "xl": "1280px",
       },
     },
     extend: {
       fontFamily: {
-        sans: ["Poppins", "sans-serif"],
-        display: ["Playfair Display", "serif"],
+        sans: ["mr-eaves-xl-modern", "Plus Jakarta Sans", "Poppins", "sans-serif"],
+        display: ["mr-eaves-xl-modern", "Playfair Display", "serif"],
+        mreaves: ["mr-eaves-xl-modern", "sans-serif"],
+      },
+      boxShadow: {
+        xs: "var(--shadow-xs)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
       },
       colors: {
         'ws-brown': '#5a3825',
+        'fe-orange': '#ec7744',
+        'fe-orange-hover': '#f09269',
+        'fe-orange-active': '#8e4729',
+        'fe-orange-light': '#fbe4da',
+        'fe-dark': '#121212',
+        'fe-warm': '#f8f1eb',
+        'fe-neutral': '#f7f7f7',
+        'fe-gray-muted': '#7d7d7d',
+        'fe-gray-light': '#dedede',
+        'fe-success': '#0fb67e',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -35,6 +54,10 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -91,5 +114,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

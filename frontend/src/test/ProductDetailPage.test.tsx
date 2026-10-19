@@ -33,7 +33,7 @@ vi.mock('@/lib/api', () => ({
 
 vi.mock('@/lib/utils', () => ({
   getImageUrl: (path: string) => `http://localhost:5000${path}`,
-  cn: (...inputs: any[]) => inputs.join(' '),
+  cn: (...inputs: unknown[]) => inputs.filter(Boolean).join(' '),
 }));
 
 const queryClient = new QueryClient();
@@ -56,7 +56,7 @@ describe('ProductDetailPage', () => {
       </QueryClientProvider>
     );
 
-    expect(await screen.findByText('Test Product')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Test Product', level: 1 })).toBeInTheDocument();
     expect(screen.getByText('Test Description')).toBeInTheDocument();
     
     const priceSection = screen.getByText('Inclusive of all taxes').parentElement;
