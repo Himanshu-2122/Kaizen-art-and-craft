@@ -8,17 +8,29 @@ dns.setDefaultResultOrder("ipv4first");
 
 const dbConnect = async (): Promise<void> => {
   const uri = process.env.MONGODB_URI;
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (isProd && !uri) {
+    throw new Error("CRITICAL: MONGODB_URI environment variable is required in production.");
+  }
 
   if (uri) {
     try {
       console.log("🔌 Connecting to remote MongoDB Atlas...");
       const conn = await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: isProd ? 10000 : 5000,
+        maxPoolSize: 20,
+        minPoolSize: 2,
+        socketTimeoutMS: 45000,
         family: 4,
       });
       console.log(`✅ MongoDB Connected — DB: ${conn.connection.name}`);
       return;
     } catch (err: any) {
+      if (isProd) {
+        console.error(`❌ Production MongoDB connection failed: ${err.message}`);
+        throw err;
+      }
       console.warn(`⚠️ Could not connect to remote MongoDB Atlas (${err.message}).`);
     }
   }

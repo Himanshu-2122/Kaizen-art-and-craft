@@ -9,6 +9,7 @@ import {
 } from "../controllers/category.controller";
 import { protect, isAdmin } from "../middleware/auth.middleware";
 import { uploadImages } from "../middleware/upload";
+import { imageOptimizer } from "../middleware/imageOptimizer";
 
 const router = Router();
 
@@ -18,8 +19,8 @@ router.get("/:id", getCategoryByIdOrSlug);
 router.get("/:id/products", getProductsByCategory);
 
 /* ---------- ADMIN ---------- */
-router.post("/", protect, isAdmin, uploadImages.single("image"), createCategory);
-router.put("/:id", protect, isAdmin, uploadImages.single("image"), updateCategory);
+router.post("/", protect, isAdmin, uploadImages.single("image"), imageOptimizer, createCategory);
+router.put("/:id", protect, isAdmin, uploadImages.single("image"), imageOptimizer, updateCategory);
 router.delete("/:id", protect, isAdmin, deleteCategory);
 
 export default router;

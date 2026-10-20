@@ -1,5 +1,7 @@
+import mongoose from "mongoose";
 import { User } from "../models/user.model";
 import { Order } from "../models/order.model";
+import { Product } from "../models/product.model";
 import { Request, Response } from "express";
 
 const VALID_STATUSES = ["pending", "completed", "cancelled"] as const;
@@ -23,20 +25,78 @@ export const checkout = async (req: any, res: Response) => {
       return res.status(400).json({ message: "Complete shipping address is required" });
     }
 
-    const total = items.reduce(
-      (sum: number, item: any) => sum + Number(item.price) * Number(item.quantity),
-      0
-    );
+    // Look up authoritative prices and stock from MongoDB for valid ObjectIds
+    const rawIds = items
+      .map((i: any) => String(i.product_id ?? i.productId ?? ""))
+      .filter((id: string) => mongoose.Types.ObjectId.isValid(id));
+
+    const dbProducts = rawIds.length > 0
+      ? await Product.find({ _id: { $in: rawIds }, isActive: true })
+      : [];
+    const productMap = new Map(dbProducts.map((p) => [String(p._id), p]));
+
+    let total = 0;
+    const verifiedItems: Array<{
+      productId?: mongoose.Types.ObjectId;
+      name: string;
+      price: number;
+      quantity: number;
+      size: string;
+    }> = [];
+
+    for (const item of items) {
+      const pid = String(item.product_id ?? item.productId ?? "");
+      const qty = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      const dbProd = productMap.get(pid);
+
+      if (dbProd) {
+        if (dbProd.stock !== undefined && dbProd.stock < qty) {
+          return res.status(400).json({
+            message: `Insufficient stock for ${dbProd.name} (available: ${dbProd.stock})`,
+          });
+        }
+        const unitPrice = Number(dbProd.price);
+        total += unitPrice * qty;
+        verifiedItems.push({
+          productId: dbProd._id as mongoose.Types.ObjectId,
+          name: dbProd.name,
+          price: unitPrice,
+          quantity: qty,
+          size: item.size ?? "",
+        });
+      } else if (process.env.NODE_ENV === "production") {
+        return res.status(400).json({
+          message: `Product "${item.name || pid}" is unavailable or invalid`,
+        });
+      } else {
+        // Non-production fallback for local mock/placeholder catalog items
+        const fallbackPrice = Math.max(0, Number(item.price) || 0);
+        total += fallbackPrice * qty;
+        verifiedItems.push({
+          ...(mongoose.Types.ObjectId.isValid(pid)
+            ? { productId: new mongoose.Types.ObjectId(pid) }
+            : {}),
+          name: item.name,
+          price: fallbackPrice,
+          quantity: qty,
+          size: item.size ?? "",
+        });
+      }
+    }
+
+    // Decrement stock for database-backed products
+    for (const vItem of verifiedItems) {
+      if (vItem.productId && productMap.has(String(vItem.productId))) {
+        await Product.updateOne(
+          { _id: vItem.productId, stock: { $gte: vItem.quantity } },
+          { $inc: { stock: -vItem.quantity } }
+        );
+      }
+    }
 
     const order = await Order.create({
       userId: req.user.id,
-      items: items.map((i: any) => ({
-        productId: i.product_id ?? i.productId,
-        name:      i.name,
-        price:     Number(i.price),
-        quantity:  Number(i.quantity),
-        size:      i.size ?? "",
-      })),
+      items: verifiedItems,
       total,
       status: "pending",
       shippingAddress,

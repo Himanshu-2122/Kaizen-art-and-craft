@@ -23,75 +23,86 @@
 
 @layer base {
   :root {
-    /* Brand Palette - Reference CSS */
-    --background: 0 0% 100%; /* Pure white / light crisp backdrop */
-    --foreground: 0 0% 7%;   /* #121212 */
+    /* Kaizen Livings Design Tokens */
+    --background: 0 0% 100%;       /* #FFFFFF */
+    --foreground: 0 0% 20%;        /* #323232 Text Primary */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card: 0 0% 100%;             /* #FFFFFF */
+    --card-foreground: 0 0% 20%;   /* #323232 */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover-foreground: 0 0% 20%;
 
-    /* Primary Accent #ec7744 -> hsl(18, 81%, 59%) */
-    --primary: 18 81% 59%;
+    /* Primary Brand Orange #DF6B3B -> hsl(18, 72%, 55%) */
+    --primary: 18 72% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: #C85A2E;
 
-    /* Warm Sparkle background #f8f1eb -> hsl(28, 46%, 95%) */
-    --secondary: 28 46% 95%;
-    --secondary-foreground: 0 0% 7%;
+    /* Section Off-white #F8F1EB / #F5F5F5 */
+    --secondary: 28 46% 95%;       /* #F8F1EB */
+    --secondary-foreground: 0 0% 20%;
 
-    /* Neutral grey 20 #f7f7f7 / #f1f1f1 */
-    --muted: 0 0% 97%;
-    --muted-foreground: 0 0% 49%; /* #7d7d7d */
+    --muted: 0 0% 96%;             /* #F5F5F5 Section Background */
+    --muted-foreground: 0 0% 40%;  /* #666666 Text Secondary */
 
-    --accent: 18 81% 59%;
+    --accent: 18 72% 55%;          /* #DF6B3B */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 74% 57%; /* #e53e3e */
+    --destructive: 0 74% 57%;      /* #E53E3E */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 160 85% 39%; /* #0fb67e */
+    --success: 160 85% 39%;        /* #0FB67E Sale/In Stock */
     --success-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%; /* #dedede / #e1e1e1 */
-    --input: 0 0% 88%;
-    --ring: 18 81% 59%;
+    --border: 0 0% 88%;            /* #E0E0E0 Divider/Border */
+    --input: 0 0% 88%;             /* #E0E0E0 */
+    --ring: 18 72% 55%;            /* #DF6B3B */
 
-    --radius: 0.25rem; /* Clean 4px radius aligned with reference button/card specs */
+    --radius: 0.25rem;             /* 4px crisp flat aesthetic */
 
     --shadow-xs: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0px 2px 16px -4px rgba(0, 0, 0, 0.08); /* fe-shadow-s */
-    --shadow-md: 0px 0px 24px -16px rgba(0, 0, 0, 0.2);  /* fe-shadow-m */
-    --shadow-lg: -16px -16px 120px 62px rgba(0, 0, 0, 0.1); /* fe-shadow-l */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 7%;
-    --sidebar-primary: 18 81% 59%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 18 72% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 28 46% 95%;
-    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 18 81% 59%;
+    --sidebar-ring: 18 72% 55%;
 
-    --wood: 18 81% 59%;
+    --wood: 18 72% 55%;
     --wood-light: 28 46% 95%;
-    --warm-gray: 0 0% 49%;
+    --warm-gray: 0 0% 40%;
 
-    /* Dedicated token helpers for reference palette */
-    --fe-primary: #ec7744;
-    --fe-primary-hover: #f09269;
-    --fe-primary-active: #8e4729;
-    --fe-primary-subtle: #fbe4da;
-    --fe-warm-bg: #f8f1eb;
-    --fe-neutral-bg: #f7f7f7;
-    --fe-dark: #121212;
-    --fe-muted: #7d7d7d;
+    /* Dedicated Kaizen Livings Token Helpers */
+    --ul-orange: #DF6B3B;
+    --ul-orange-hover: #C85A2E;
+    --ul-orange-active: #A8441F;
+    --ul-orange-light: #FBE4DA;
+    --ul-charcoal: #323232;
+    --ul-gray: #666666;
+    --ul-gray-light: #999999;
+    --ul-border: #E0E0E0;
+    --ul-section: #F5F5F5;
+    --ul-warm: #F8F1EB;
+    --ul-sale: #0FB67E;
+
+    --fe-primary: #DF6B3B;
+    --fe-primary-hover: #C85A2E;
+    --fe-primary-active: #A8441F;
+    --fe-primary-subtle: #FBE4DA;
+    --fe-warm-bg: #F8F1EB;
+    --fe-neutral-bg: #F5F5F5;
+    --fe-dark: #323232;
+    --fe-muted: #666666;
     --fe-light-muted: #999999;
-    --fe-border: #dedede;
-    --fe-success: #0fb67e;
+    --fe-border: #E0E0E0;
+    --fe-success: #0FB67E;
   }
-
 
   .dark {
     --background: 30 10% 7%;
@@ -103,8 +114,8 @@
     --popover: 30 10% 10%;
     --popover-foreground: 40 20% 95%;
 
-    --primary: 15 55% 48%;
-    --primary-foreground: 20 15% 10%;
+    --primary: 18 72% 55%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 45 65% 52%;
     --secondary-foreground: 20 15% 10%;
@@ -112,29 +123,29 @@
     --muted: 30 10% 18%;
     --muted-foreground: 24 10% 55%;
 
-    --accent: 15 55% 48%;
-    --accent-foreground: 20 15% 10%;
+    --accent: 18 72% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 3 75% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 135 50% 35%;
+    --success: 160 85% 39%;
     --success-foreground: 0 0% 100%;
 
     --border: 30 10% 16%;
     --input: 30 10% 16%;
-    --ring: 15 55% 44%;
+    --ring: 18 72% 55%;
 
     --sidebar-background: 20 15% 10%;
     --sidebar-foreground: 40 15% 98%;
-    --sidebar-primary: 15 55% 48%;
-    --sidebar-primary-foreground: 20 15% 10%;
+    --sidebar-primary: 18 72% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 45 65% 52%;
     --sidebar-accent-foreground: 20 15% 10%;
     --sidebar-border: 30 10% 16%;
-    --sidebar-ring: 15 55% 44%;
+    --sidebar-ring: 18 72% 55%;
 
-    --wood: 15 55% 44%;
+    --wood: 18 72% 55%;
     --wood-light: 30 10% 15%;
     --warm-gray: 20 15% 12%;
   }
@@ -146,39 +157,40 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'mr-eaves-xl-modern', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Open Sans', 'Lato', 'mr-eaves-xl-modern', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #121212;
+    color: #323232;
   }
-  h1, h2, h3, h4 {
-    font-family: 'mr-eaves-xl-modern', 'Plus Jakarta Sans', 'Playfair Display', serif;
-    color: #121212;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Open Sans', 'Lato', 'mr-eaves-xl-modern', sans-serif;
+    color: #323232;
+    font-weight: 700;
   }
 
-  /* Type scale — using clamping for fluid typography */
+  /* Type scale */
   :root {
-    --font-display: clamp(2.25rem, 4.5vw, 3.5rem);
-    --font-h1: clamp(1.85rem, 3.5vw, 2.5rem);
-    --font-h2: clamp(1.5rem, 2.75vw, 2rem);
-    --font-h3: clamp(1.25rem, 2.2vw, 1.5rem);
-    --font-h4: clamp(1.1rem, 1.75vw, 1.25rem);
-    --font-body: clamp(0.95rem, 1.2vw, 1.05rem);
-    --font-small: clamp(0.85rem, 1vw, 0.925rem);
-    --font-caption: clamp(0.75rem, 0.9vw, 0.8125rem);
+    --font-display: clamp(2rem, 3.8vw, 3rem);
+    --font-h1: clamp(1.75rem, 3vw, 2.25rem);
+    --font-h2: clamp(1.35rem, 2.4vw, 1.75rem);
+    --font-h3: clamp(1.15rem, 2vw, 1.4rem);
+    --font-h4: clamp(1rem, 1.5vw, 1.2rem);
+    --font-body: 0.875rem; /* 14px standard UL body text */
+    --font-small: 0.8125rem; /* 13px */
+    --font-caption: 0.75rem; /* 12px */
   }
 
-  h1 { font-size: var(--font-h1); line-height: 1.2; font-weight: 700; }
-  h2 { font-size: var(--font-h2); line-height: 1.25; font-weight: 700; }
-  h3 { font-size: var(--font-h3); line-height: 1.35; font-weight: 700; }
+  h1 { font-size: var(--font-h1); line-height: 1.25; font-weight: 700; }
+  h2 { font-size: var(--font-h2); line-height: 1.3; font-weight: 700; }
+  h3 { font-size: var(--font-h3); line-height: 1.35; font-weight: 600; }
   h4 { font-size: var(--font-h4); line-height: 1.4; font-weight: 600; }
-  .body { font-size: var(--font-body); line-height: 1.6; }
+  .body { font-size: var(--font-body); line-height: 1.5; color: #666666; }
   .small { font-size: var(--font-small); }
-  .caption { font-size: var(--font-caption); line-height: 1.5; }
+  .caption { font-size: var(--font-caption); line-height: 1.4; }
 
   /* Selection color */
   ::selection {
-    background-color: #ec7744;
+    background-color: #DF6B3B;
     color: #ffffff;
   }
 
@@ -189,7 +201,7 @@
 
   /* Focus ring */
   :focus-visible {
-    outline: 2px solid #ec7744;
+    outline: 2px solid #DF6B3B;
     outline-offset: 2px;
   }
 }

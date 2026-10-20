@@ -42,7 +42,7 @@ export default function AboutPage() {
           <span className="inline-block bg-[#ec7744] text-white text-[10px] font-bold tracking-[3px] uppercase px-3 py-1 mb-4 rounded-[2px]">
             Our Story
           </span>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">About Kaizen Art & Craft</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">About Kaizen Livings</h1>
           <p className="text-white/80 text-base md:text-lg">
             Mastering solid wood furniture craftsmanship — built to last generations.
           </p>
@@ -58,11 +58,12 @@ export default function AboutPage() {
               Handcrafting Solid Wood Furniture for Modern Homes
             </h2>
             <p className="text-[15px] text-[#7d7d7d] leading-[1.9] mb-4">
-              Kaizen Art & Craft is an artisan workshop and design house specialized in solid Sheesham, Teak, and Mango wood furniture. We blend traditional Indian hand-joinery and jali carving with contemporary, functional storage aesthetics.
+              Kaizen Livings is an artisan workshop and design house specialized in solid Sheesham, Teak, and Mango wood furniture. We blend traditional Indian hand-joinery and jali carving with contemporary, functional storage aesthetics.
             </p>
             <p className="text-[15px] text-[#7d7d7d] leading-[1.9]">
-              Every 3-daraz, 6-daraz rack, coffee table, and dining piece is cured, hand-sanded, and polished with non-toxic heritage finishes by seasoned wood artisans in Jodhpur and Saharanpur.
+              Every sofa, bed, coffee table, and dining piece is cured, hand-sanded, and polished with non-toxic heritage finishes by seasoned wood artisans in Jodhpur and Saharanpur.
             </p>
+
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#dedede]">
@@ -89,12 +90,12 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── Features / Why Choose Kaizen ── */}
+      {/* ── Features / Why Choose Kaizen Livings ── */}
       <section className="bg-[#F8F8F8] py-16">
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="text-center mb-12">
             <span className="text-[11px] font-bold tracking-[3px] text-[#FF6E31] uppercase block mb-2">Why Us</span>
-            <h2 className="font-serif text-4xl text-[#111111]">Why Choose Kaizen</h2>
+            <h2 className="font-serif text-4xl text-[#111111]">Why Choose Kaizen Livings</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((f) => (

@@ -5,7 +5,7 @@ export const ANNOUNCEMENT_OFFERS = [
   { id: "secure-payments", text: "Secure payments with UPI, Card, Netbanking", type: "info" },
 ];
 
-export const SITE_NAME = "Kaizen Art and Craft";
+export const SITE_NAME = "Kaizen Livings";
 export const SITE_TAGLINE = "Modern Furniture, Timeless Design";
 
 export const PLACEHOLDER_COLLECTIONS = [

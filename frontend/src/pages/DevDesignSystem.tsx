@@ -73,7 +73,7 @@ export default function DevDesignSystem() {
         Theme: {theme === "light" ? "🌙 Dark" : "☀️ Light"}
       </button>
 
-      <SectionHeading>Design System Demo — Kaizen Art & Craft</SectionHeading>
+      <SectionHeading>Design System Demo — Kaizen Livings</SectionHeading>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Colors */}

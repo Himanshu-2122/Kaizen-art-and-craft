@@ -2,10 +2,19 @@ import { Router } from "express";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import { ContactMessage } from "../models/contact.model";
+import { contactLimiter } from "../middleware/rateLimiter";
 
 dotenv.config();
 
 const router = Router();
+
+const escapeHtml = (unsafe: string): string =>
+  String(unsafe)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -15,7 +24,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-router.post("/contact", async (req, res) => {
+router.post("/contact", contactLimiter, async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
@@ -23,18 +32,26 @@ router.post("/contact", async (req, res) => {
       return res.status(400).json({ message: "Name, email, and message are required" });
     }
 
-    await ContactMessage.create({ name, email, message });
+    const cleanName = String(name).trim().slice(0, 120);
+    const cleanEmail = String(email).trim().slice(0, 160);
+    const cleanMessage = String(message).trim().slice(0, 4000);
+
+    await ContactMessage.create({
+      name: cleanName,
+      email: cleanEmail,
+      message: cleanMessage,
+    });
 
     try {
       const info = await transporter.sendMail({
-        from: `"Kaizen Art" <${process.env.GMAIL_USER}>`,
+        from: `"Kaizen Livings" <${process.env.GMAIL_USER}>`,
         to: "hi.himanshu21@gmail.com",
-        subject: `New Contact Message from ${name}`,
+        subject: `New Contact Message from ${cleanName}`,
         html: `
           <h3>New Contact Message</h3>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Email:</b> ${email}</p>
-          <p><b>Message:</b> ${message}</p>
+          <p><b>Name:</b> ${escapeHtml(cleanName)}</p>
+          <p><b>Email:</b> ${escapeHtml(cleanEmail)}</p>
+          <p><b>Message:</b> ${escapeHtml(cleanMessage)}</p>
         `,
       });
 

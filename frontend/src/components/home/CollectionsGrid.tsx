@@ -11,42 +11,37 @@ const FALLBACK_CATEGORIES = [
     isNew: true,
   },
   {
-    name: "Living Room",
-    href: "/shop?category=3-daraz",
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=500&q=80",
+    name: "Sofas & Recliners",
+    href: "/shop?category=sofas",
+    image: "/images/categories/sofas.jpg",
   },
   {
-    name: "3 Daraz Racks",
-    href: "/shop?category=3-daraz",
-    image:
-      "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=500&q=80",
+    name: "Beds & Mattresses",
+    href: "/shop?category=beds",
+    image: "/images/categories/beds.jpg",
   },
   {
-    name: "6 Daraz Cabinets",
-    href: "/shop?category=6-daraz",
-    image:
-      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=500&q=80",
+    name: "Dining Sets",
+    href: "/shop?category=dining",
+    image: "/images/categories/dining.jpg",
   },
   {
-    name: "Solid Wood Tables",
-    href: "/shop",
-    image:
-      "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=500&q=80",
+    name: "Coffee Tables",
+    href: "/shop?category=coffee-tables",
+    image: "/images/categories/coffee-tables.jpg",
   },
   {
-    name: "Chairs & Seating",
-    href: "/shop",
-    image:
-      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=500&q=80",
+    name: "TV Units & Media",
+    href: "/shop?category=tv-units",
+    image: "/images/categories/tv-units.jpg",
   },
   {
     name: "All Furniture",
     href: "/collections",
-    image:
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=500&q=80",
+    image: "/images/categories/bookshelves.jpg",
   },
 ];
+
 
 export default function CollectionsGrid() {
   const { data: dbCategories = [] } = useCategories();

@@ -16,15 +16,17 @@ interface Collection {
 }
 
 const FALLBACK_IMAGES: Record<string, string> = {
-  "3-daraz":        "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?w=800&q=80",
-  "6-daraz":        "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=800&q=80",
-  "living-room":    "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80",
-  "dining":         "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&q=80",
-  "bedroom":        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&q=80",
-  "wall-art":       "https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=800&q=80",
-  "pottery":        "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&q=80",
-  "textile-crafts": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80",
+  "sofas":            "/images/categories/sofas.jpg",
+  "beds":             "/images/categories/beds.jpg",
+  "dining":           "/images/categories/dining.jpg",
+  "coffee-tables":    "/images/categories/coffee-tables.jpg",
+  "chairs":           "/images/categories/chairs.jpg",
+  "tv-units":         "/images/categories/tv-units.jpg",
+  "bookshelves":      "/images/categories/bookshelves.jpg",
+  "chest-of-drawers": "/images/categories/chest-of-drawers.jpg",
+  "dressing-tables":  "/images/categories/dressing-tables.jpg",
 };
+
 
 export default function CollectionsPage() {
   const { slug } = useParams();

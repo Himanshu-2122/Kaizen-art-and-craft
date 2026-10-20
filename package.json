@@ -4,9 +4,13 @@
     "description": "this repo is about my full fledged website",
     "main": "index.js",
     "scripts": {
+        "start": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue.bold,green.bold\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+        "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue.bold,green.bold\" \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
         "backend": "npm --prefix backend run dev",
         "frontend": "npm --prefix frontend run dev",
-        "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+        "build": "npm --prefix backend run build && npm --prefix frontend run build",
+        "seed": "npm --prefix backend run seed",
+        "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install"
     },
     "repository": {
         "type": "git",
@@ -19,5 +23,8 @@
     "bugs": {
         "url": "https://github.com/Himanshu-2122/Kaizen-art-and-craft/issues"
     },
-    "homepage": "https://github.com/Himanshu-2122/Kaizen-art-and-craft#readme"
+    "homepage": "https://github.com/Himanshu-2122/Kaizen-art-and-craft#readme",
+    "devDependencies": {
+        "concurrently": "^10.0.6"
+    }
 }

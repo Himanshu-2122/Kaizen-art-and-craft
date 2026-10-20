@@ -5,6 +5,20 @@ import { User } from "../models/user.model";
 
 const ACCESS_EXPIRE = "15m";
 const REFRESH_EXPIRE = "7d";
+const REFRESH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+const getRefreshCookieOptions = () => {
+  const isProd = process.env.NODE_ENV === "production";
+  const sameSite =
+    (process.env.COOKIE_SAME_SITE as "lax" | "strict" | "none" | undefined) ||
+    (isProd ? "none" : "lax");
+  return {
+    httpOnly: true,
+    secure: isProd || sameSite === "none",
+    sameSite,
+    maxAge: REFRESH_COOKIE_MAX_AGE,
+  };
+};
 
 export const generateTokens = (user: any) => {
   const payload = {
@@ -53,11 +67,7 @@ export const signup = async (req: Request, res: Response) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      })
+      .cookie("refreshToken", refreshToken, getRefreshCookieOptions())
       .status(201)
       .json({
         accessToken,
@@ -92,11 +102,7 @@ export const login = async (req: Request, res: Response) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     res
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      })
+      .cookie("refreshToken", refreshToken, getRefreshCookieOptions())
       .json({
         accessToken,
         user: {
@@ -142,12 +148,9 @@ export const refresh = (req: Request, res: Response) => {
 };
 
 export const logout = (_req: Request, res: Response) => {
+  const { maxAge: _maxAge, ...clearOpts } = getRefreshCookieOptions();
   res
-    .clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-    })
+    .clearCookie("refreshToken", clearOpts)
     .status(200)
     .json({ message: "Logged out successfully" });
 };

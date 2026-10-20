@@ -10,12 +10,13 @@ import {
   getAllUsers,
 } from "../controllers/auth.controller";
 import { protect, isAdmin } from "../middleware/auth.middleware";
+import { authLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
 /* ── PUBLIC ── */
-router.post("/signup",  signup);
-router.post("/login",   login);
+router.post("/signup",  authLimiter, signup);
+router.post("/login",   authLimiter, login);
 router.post("/logout",  logout);
 router.post("/refresh", refresh);
 

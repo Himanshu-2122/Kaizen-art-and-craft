@@ -1,8 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
-import AnnouncementBar from "@/components/common/AnnouncementBar";
-import TopBar from "./TopBar";
 import MainNavbar from "./MainNavbar";
 import Footer from "./Footer";
 
@@ -23,10 +21,7 @@ export default function Layout() {
         Skip to main content
       </a>
 
-      {/* 🔝 Utility strip */}
-      <AnnouncementBar />
-
-      {/* 🔝 Main header (logo + search + icons) */}
+      {/* 🔝 Kaizen Livings Unified Header (Top Strip + Main Bar + Category Mega-Menu) */}
       <MainNavbar />
 
       {/* 🔽 Page content */}

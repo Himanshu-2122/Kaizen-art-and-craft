@@ -1,163 +1,191 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import useEmblaCarousel from "embla-carousel-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const slides = [
+interface SlideData {
+  tag: string;
+  headline: string;
+  subline: string;
+  ctaPrimary: string;
+  ctaSecondary: string;
+  ctaHref: string;
+  image: string;
+  badgeColor?: string;
+}
+
+const HERO_SLIDES: SlideData[] = [
   {
-    tag: "Artisan Wooden Living",
-    headline: "Handcrafted Solid\nWood Masterpieces",
-    subline: "Artisan Sheesham & Teak wood furniture, ergonomic lounge chairs, and carved living room storage.",
-    ctaPrimary: "Explore Furniture",
-    ctaSecondary: "All Craft Categories",
-    ctaHref: "/shop?category=3-daraz",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1600&q=80",
+    tag: "Mega Furniture Sale",
+    headline: "Living Room Luxury &\nContemporary Sofas",
+    subline: "Handcrafted 3-seater fabric lounges, chesterfields, and solid wood recliners engineered for enduring comfort.",
+    ctaPrimary: "Shop Sofas",
+    ctaSecondary: "View Range",
+    ctaHref: "/shop?category=sofas",
+    image: "/images/banners/hero-sofa.jpg",
   },
   {
-    tag: "Designer Craft",
-    headline: "Timeless Dining &\nCoffee Tables",
-    subline: "Solid oak & elm handcrafted dining sets, carved coffee tables, and contemporary wooden consoles.",
-    ctaPrimary: "Shop Tables & Seating",
-    ctaSecondary: "All Craft Categories",
-    ctaHref: "/shop",
-    image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=1600&q=80",
+    tag: "Master Bedroom Comfort",
+    headline: "Solid Teak Wood Beds &\nPlatform Storage",
+    subline: "King & Queen size beds in warm honey and walnut finishes, featuring silent acoustic slats and durable joinery.",
+    ctaPrimary: "Explore Beds",
+    ctaSecondary: "Bedroom Decor",
+    ctaHref: "/shop?category=beds",
+    image: "/images/banners/hero-bed.jpg",
   },
   {
-    tag: "Heritage Storage",
-    headline: "Decorative 3 & 6\nDaraz Wooden Racks",
-    subline: "Handcrafted Sheesham & Teak wood multi-shelf wall racks, cabinets, and artisan storage units.",
-    ctaPrimary: "Shop Wooden Racks",
-    ctaSecondary: "All Craft Categories",
-    ctaHref: "/shop?category=3-daraz",
-    image: "https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=1600&q=80",
+    tag: "Family Feasts & Dining",
+    headline: "Solid Wood Slab &\nMarble Dining Sets",
+    subline: "Hand-finished 6-seater dining tables, solid wood benches, and sculpted dining chairs crafted from seasoned timber.",
+    ctaPrimary: "Shop Dining Sets",
+    ctaSecondary: "Browse Dining",
+    ctaHref: "/shop?category=dining",
+    image: "/images/banners/hero-dining.jpg",
+  },
+  {
+    tag: "Modern Entertainment",
+    headline: "Sleek Media Consoles &\nWall TV Units",
+    subline: "Contemporary lowline TV stands with fluted facades and integrated wire management for clean living rooms.",
+    ctaPrimary: "Discover TV Units",
+    ctaSecondary: "Explore Living",
+    ctaHref: "/shop?category=tv-units",
+    image: "/images/banners/hero-tv-unit.jpg",
   },
 ];
 
-export default function HeroBanner() {
-  const [current, setCurrent] = useState(0);
-  const [animating, setAnimating] = useState(false);
 
-  const go = useCallback((idx: number) => {
-    if (animating || idx === current) return;
-    setAnimating(true);
-    setCurrent(idx);
-    setTimeout(() => setAnimating(false), 600);
-  }, [animating, current]);
+export default function HeroBanner() {
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 25 });
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
+  const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
 
   useEffect(() => {
-    const t = setInterval(() => go((current + 1) % slides.length), 5000);
-    return () => clearInterval(t);
-  }, [current, go]);
+    if (!emblaApi) return;
+    onSelect();
+    setScrollSnaps(emblaApi.scrollSnapList());
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
 
-  const slide = slides[current];
+    // Auto-advance every 5 seconds
+    const interval = setInterval(() => {
+      emblaApi.scrollNext();
+    }, 5500);
+
+    return () => {
+      clearInterval(interval);
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   return (
-    // Outer section: no background of its own — inherits the page/body background
-    <section className="relative w-full px-4 sm:px-6 md:px-10 lg:px-14 pt-3 md:pt-5 pb-2">
-      {/* Inner framed box */}
-      <div
-        className="relative w-full mx-auto overflow-hidden rounded-[4px] border border-[#dedede] shadow-sm"
-        style={{
-          minHeight: 480,
-          maxWidth: "1400px",
-        }}
-      >
-        {/* Slide images */}
-        {slides.map((s, i) => (
-          <img
-            key={i}
-            src={s.image}
-            alt={s.headline}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-            style={{ opacity: i === current ? 1 : 0 }}
-            loading={i === 0 ? "eager" : "lazy"}
-          />
-        ))}
-
-        {/* Dark gradient overlay from left */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/15" />
-
-        {/* Content */}
-        <div className="relative z-10 h-full flex items-center py-12 sm:py-0" style={{ minHeight: 480 }}>
-          <div className="max-w-[1400px] w-full mx-auto px-6 sm:px-10 md:px-14">
+    <section className="relative w-full overflow-hidden bg-[#F5F5F5] border-b border-[#E0E0E0] font-sans">
+      <div className="relative w-full" ref={emblaRef}>
+        <div className="flex">
+          {HERO_SLIDES.map((slide, index) => (
             <div
-              key={current}
-              className="max-w-xl"
-              style={{ animation: "hero-slide-up 0.6s ease forwards" }}
+              key={index}
+              className="relative flex-[0_0_100%] min-w-0 h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px] overflow-hidden"
             >
-              {/* Orange tag label: reference #ec7744 badge */}
-              <span className="inline-block bg-[#ec7744] text-white text-[11px] font-bold tracking-widest uppercase px-3 py-1 mb-4 rounded-[2px]">
-                {slide.tag}
-              </span>
+              {/* Background Banner Image */}
+              <img
+                src={slide.image}
+                alt={slide.headline}
+                width={1400}
+                height={580}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                decoding={index === 0 ? "sync" : "async"}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out"
+                loading={index === 0 ? "eager" : "lazy"}
+              />
 
-              {/* Headline */}
-              <h1 className="text-white text-[2rem] sm:text-[2.6rem] md:text-[3.2rem] lg:text-[3.6rem] font-bold leading-[1.12] tracking-tight mb-4 whitespace-pre-line">
-                {slide.headline}
-              </h1>
+              {/* Gradient Overlay for high readability */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent sm:to-black/20" />
 
-              {/* Subline */}
-              <p className="text-white/80 text-sm md:text-base leading-relaxed mb-6 max-w-md line-clamp-2">
-                {slide.subline}
-              </p>
+              {/* Slide Content (Left-aligned Kaizen Livings layout) */}
+              <div className="relative z-10 h-full max-w-[1400px] mx-auto px-6 lg:px-10 flex items-center">
+                <div className="max-w-xl text-white py-8">
+                  {/* Category Pill Tag */}
+                  <span className="inline-block bg-[#DF6B3B] text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 mb-4 rounded-[2px] shadow-xs">
+                    {slide.tag}
+                  </span>
 
-              {/* CTA row */}
-              <div className="flex flex-wrap items-center gap-3">
-                <Link
-                  to={slide.ctaHref}
-                  className="bg-[#ec7744] hover:bg-[#f09269] active:bg-[#8e4729] text-white font-bold text-sm px-7 py-3 rounded-[4px] shadow-sm transition-all flex items-center gap-2"
-                >
-                  {slide.ctaPrimary}
-                  <span>→</span>
-                </Link>
-                <Link
-                  to="/shop"
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-sm font-semibold text-sm px-6 py-3 rounded-[4px] transition-all"
-                >
-                  {slide.ctaSecondary}
-                </Link>
+                  {/* Headline */}
+                  <h1 className="text-[28px] sm:text-[38px] md:text-[46px] lg:text-[52px] font-bold text-white leading-[1.15] tracking-tight mb-3 sm:mb-4 whitespace-pre-line">
+                    {slide.headline}
+                  </h1>
+
+                  {/* Subline */}
+                  <p className="text-white/85 text-xs sm:text-sm md:text-base leading-relaxed mb-6 max-w-lg line-clamp-2 sm:line-clamp-3">
+                    {slide.subline}
+                  </p>
+
+                  {/* CTA Buttons */}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      to={slide.ctaHref}
+                      className="bg-[#DF6B3B] hover:bg-[#C85A2E] active:bg-[#A8441F] text-white font-bold text-xs sm:text-sm px-7 py-3 rounded-[2px] shadow-sm transition-all flex items-center gap-2 uppercase tracking-wider"
+                    >
+                      <span>{slide.ctaPrimary}</span>
+                      <ArrowRight size={15} />
+                    </Link>
+                    <Link
+                      to="/shop"
+                      className="bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-xs font-semibold text-xs sm:text-sm px-6 py-3 rounded-[2px] transition-all"
+                    >
+                      {slide.ctaSecondary}
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Navigation arrows: reference .rINTw / .uAauI */}
-        <button
-          onClick={() => go((current - 1 + slides.length) % slides.length)}
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[4px] bg-white/80 hover:bg-white text-[#121212] flex items-center justify-center shadow-md transition-all z-20"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          onClick={() => go((current + 1) % slides.length)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[4px] bg-white/80 hover:bg-white text-[#121212] flex items-center justify-center shadow-md transition-all z-20"
-          aria-label="Next slide"
-        >
-          <ChevronRight size={20} />
-        </button>
-
-        {/* Slide indicators: reference .Mkr8h / .iVvPI */}
-        <div className="absolute bottom-4 right-6 flex items-center gap-2 z-20">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => go(i)}
-              className={cn(
-                "transition-all duration-200 rounded-full",
-                i === current ? "w-6 h-2 bg-[#ec7744]" : "w-2 h-2 bg-white/60 hover:bg-white"
-              )}
-              aria-label={`Go to slide ${i + 1}`}
-            />
           ))}
         </div>
       </div>
 
-      <style>{`
-        @keyframes hero-slide-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      {/* ── Prev / Next Navigation Arrows (Kaizen Livings ._rrED) ── */}
+      <button
+        onClick={scrollPrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[2px] bg-white/90 hover:bg-white text-[#323232] hover:text-[#DF6B3B] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer border border-[#E0E0E0]/80"
+        aria-label="Previous Slide"
+      >
+        <ChevronLeft size={22} className="stroke-[2]" />
+      </button>
+
+      <button
+        onClick={scrollNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-[2px] bg-white/90 hover:bg-white text-[#323232] hover:text-[#DF6B3B] shadow-md flex items-center justify-center transition-all z-20 cursor-pointer border border-[#E0E0E0]/80"
+        aria-label="Next Slide"
+      >
+        <ChevronRight size={22} className="stroke-[2]" />
+      </button>
+
+      {/* ── Slide Indicator Dots/Pills ── */}
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+        {scrollSnaps.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => scrollTo(idx)}
+            className={cn(
+              "transition-all duration-300 rounded-full cursor-pointer",
+              idx === selectedIndex
+                ? "w-7 h-2 bg-[#DF6B3B]"
+                : "w-2 h-2 bg-white/60 hover:bg-white"
+            )}
+            aria-label={`Go to slide ${idx + 1}`}
+          />
+        ))}
+      </div>
     </section>
   );
 }

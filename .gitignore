@@ -4,10 +4,13 @@ node_modules
 backend/uploads/products/*
 !backend/uploads/products/.gitkeep/
 .env
+.env.*
+!.env.example
 venv/
 __pycache__/
 dist/
 build/
-*.egg-info/ 
+*.egg-info/
 .vercel
 .claude/
+all_images/

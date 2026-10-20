@@ -1,30 +1,26 @@
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
-import { CategoryTile } from "@/components/common/CategoryTile";
+import { CategoryTile, CategoryItem } from "@/components/common/CategoryTile";
 
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-  image?: string;
-}
-
-interface CategoryGridProps {
-  categories: Category[];
+export interface CategoryGridProps {
+  categories: CategoryItem[];
   className?: string;
 }
 
-function CategoryGrid({ categories, className }: CategoryGridProps) {
+export function CategoryGrid({ categories, className }: CategoryGridProps) {
+  if (!categories || categories.length === 0) return null;
+
   return (
-    <div className={cn(
-      "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4",
-      className
-    )}>
+    <div
+      className={cn(
+        "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6",
+        className
+      )}
+    >
       {categories.map((category) => (
-        <CategoryTile key={category._id} category={category} />
+        <CategoryTile key={category._id || category.slug} category={category} />
       ))}
     </div>
   );
 }
 
-export { CategoryGrid };
+export default CategoryGrid;

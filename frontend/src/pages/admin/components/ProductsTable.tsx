@@ -9,12 +9,22 @@ import { useCategories } from "@/hooks/useCategories";
 
 const STORAGE_TYPES = ["Without Storage", "Ready to Hang", "Freestanding", "Packaged"];
 const FALLBACK_CATEGORIES = [
+  { label: "Sofas",           value: "sofas" },
+  { label: "Beds",            value: "beds" },
+  { label: "Dining",          value: "dining" },
+  { label: "Coffee Tables",   value: "coffee-tables" },
+  { label: "Chairs",          value: "chairs" },
+  { label: "TV Units",        value: "tv-units" },
+  { label: "Bookshelves",     value: "bookshelves" },
+  { label: "Chest of Drawers",value: "chest-of-drawers" },
+  { label: "Dressing Tables", value: "dressing-tables" },
   { label: "Wall Art",        value: "wall-art" },
   { label: "Pottery",         value: "pottery" },
   { label: "Textile Crafts",  value: "textile-crafts" },
   { label: "3 Daraz",         value: "3-daraz" },
   { label: "6 Daraz",         value: "6-daraz" },
 ];
+
 
 const EMPTY_FORM = {
   name: "",

@@ -4,7 +4,7 @@ const BASE_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:5
 
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: false,
+  withCredentials: true,
 });
 
 // Attach JWT to every request
